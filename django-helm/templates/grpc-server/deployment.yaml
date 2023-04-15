@@ -1,0 +1,80 @@
+{{- if .Values.grpcServer.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Release.Name}}-grpc-server
+  labels:
+    {{- include "django-helm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: grpc-server
+spec:
+  replicas: {{ .Values.grpcServer.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "django-helm.labels" . | nindent 6 }}
+      app.kubernetes.io/component: grpc-server
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        {{- include "django-helm.labels" . | nindent 8 }}
+        app.kubernetes.io/component: grpc-server
+      annotations:
+        checksum/config: {{include (print $.Template.BasePath "/django-core/configmap.yaml") . | sha256sum }}
+    spec:
+      {{- with .Values.image.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.grpcServer.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.grpcServer.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            failureThreshold: 1
+            periodSeconds: 10
+          {{- with .Values.grpcServer.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{.Release.Name}}-config
+          env:
+            - name: aliyun_logs_{{.Release.Name}}-grpc-server
+              value: stdout
+          ports:
+            - name: grpc
+              containerPort: 8001
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.grpcServer.resources | nindent 12 }}
+      {{- with .Values.djangoServer.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.grpcServer.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.grpcServer.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- end }}
