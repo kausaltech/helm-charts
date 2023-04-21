@@ -26,6 +26,10 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{.Release.Name}}-config
+            {{- if .Values.envSecrets }}
+            - secretRef:
+                name: {{$.Release.Name}}-env-secrets
+            {{- end }}
       restartPolicy: Never
   backoffLimit: 0
   {{- end -}}

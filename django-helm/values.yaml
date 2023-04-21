@@ -13,6 +13,8 @@ configmap:
     # REDIS_URL:
     # CELERY_BROKER_URL:
 
+envSecrets: {}
+
 pvc:
   created: false
   storageClassName:
