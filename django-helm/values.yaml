@@ -13,7 +13,7 @@ configmap:
     # REDIS_URL:
     # CELERY_BROKER_URL:
 
-envSecrets: {}
+envSecretsFrom: ''
 
 pvc:
   created: false
