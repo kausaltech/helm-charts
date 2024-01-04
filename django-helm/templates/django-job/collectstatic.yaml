@@ -7,8 +7,8 @@ metadata:
     {{- include "django-helm.labels" . | nindent 4 }}
     app.kubernetes.io/component: collectstatic-job
 spec:
+  # ttlSecondsAfterFinished: 60
   template:
-    #    ttlSecondsAfterFinished: 60
     spec:
       {{- with .Values.image.imagePullSecrets }}
       imagePullSecrets:

@@ -12,8 +12,8 @@ metadata:
     "helm.sh/hook-delete-policy": hook-succeeded
 
 spec:
+  ttlSecondsAfterFinished: 60
   template:
-    ttlSecondsAfterFinished: 60
     spec:
       {{- with .Values.image.imagePullSecrets }}
       imagePullSecrets:
