@@ -1,0 +1,31 @@
+{{- if .Values.db.cluster.create -}}
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ include "paths.dbClusterName" . }}
+spec:
+  instances: 3
+  {{- if .Values.db.postgis }}
+  imageName: ghcr.io/cloudnative-pg/postgis:13
+  {{- else }}
+  imageName: ghcr.io/cloudnative-pg/postgresql:13
+  {{- end }}
+  bootstrap:
+    initdb:
+      database: {{ .Values.db.database }}
+      owner: {{ .Values.db.user }}
+      secret:
+        name: {{ include "paths.dbSecretName" . }}
+      {{- if .Values.db.postgis }}
+      postInitTemplateSQL:
+        - CREATE EXTENSION postgis;
+      {{- end }}
+  # Example of rolling update strategy:
+  # - unsupervised: automated update of the primary once all
+  #                 replicas have been upgraded (default)
+  # - supervised: requires manual supervision to perform
+  #               the switchover of the primary
+  primaryUpdateStrategy: unsupervised
+  storage:
+    size: 1Gi
+{{- end -}}

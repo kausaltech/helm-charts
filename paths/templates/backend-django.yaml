@@ -1,0 +1,69 @@
+{{- if .Values.backend.django.argoCdApplication.create -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ include "paths.backendDjangoArgoCdApplicationName" . }}
+  namespace: {{ .Values.argoCd.namespace }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd-image-updater.argoproj.io/app.pull-secret: pullsecret:{{ .Values.argoCd.namespace }}/{{ .Values.argoCd.imagePullSecret.name }}
+    argocd-image-updater.argoproj.io/app.update-strategy: digest # this assumes mutable tags; for immutable tags, better use semver
+    argocd-image-updater.argoproj.io/image-list: app={{ .Values.backend.django.image.repository }}:{{ .Values.backend.django.image.tag }}
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/kausaltech/helm-charts.git
+    path: django-helm
+    targetRevision: HEAD
+    helm:
+      values: |-
+        image:
+          repository: {{ .Values.backend.django.image.repository }}
+          tag: {{ .Values.backend.django.image.tag }}
+          imagePullSecrets:
+            - name: {{ include "paths.imagePullSecretName" . }}
+        configmap:
+          data:
+            DJANGO_SETTINGS_MODULE: paths.settings
+            DEBUG: {{ if .Values.debug }}1{{ else }}0{{ end }}
+            DEPLOYMENT_TYPE: {{ .Values.deploymentType }}
+            ALLOWED_HOSTS: {{ include "paths.backendApiHost" . }},{{ include "paths.backendAdminHost" . }}
+            HOSTNAME_INSTANCE_DOMAINS: {{ include "paths.deploymentDomain" . }}
+            # TODO
+            # MEDIA_FILES_S3_ENDPOINT: TODO
+            # MEDIA_FILES_S3_BUCKET: TODO
+            # MEDIA_FILES_S3_CUSTOM_DOMAIN: TODO
+            REDIS_URL: redis://{{ include "paths.backendRedisServiceName" . }}.{{ .Release.Namespace }}.svc.cluster.local
+            # PYTHONIOENCODING: utf-8  # Probably it's better to set the locale (line below)
+            LC_CTYPE: C.UTF-8
+            CONFIGURE_LOGGING: 1
+            {{- if .Values.backend.django.sentry.enable }}
+            SENTRY_DSN: {{ .Values.backend.django.sentry.dsn }}
+            {{- end }}
+        envSecretsFrom: {{ include "paths.backendDjangoEnvSecretName" . }}
+        djangoServer:
+          replicaCount: 3
+          # command: ['/bin/bash', '-c', '--', 'while true; do sleep 30; done;']  # Used for debugging the k8s deployment
+          command: [
+            'uwsgi',
+            '--http11-socket', ':8000',
+            '--socket', ':8001',
+            '--processes', '8',
+            '--enable-threads',
+            '--buffer-size=32768',
+            '--static-map', '/static=/srv/static',
+            '--static-map', '/media=/srv/media',
+            '--module', 'paths.wsgi',
+            ]
+        migrateJob:
+          enabled: true
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: {{ .Release.Namespace }}
+  {{- if .Values.backend.django.argoCdApplication.enableAutoSync }}
+  syncPolicy:
+    automated:
+      prune: true
+  {{- end }}
+{{- end }}

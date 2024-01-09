@@ -1,0 +1,86 @@
+argoCd:
+  namespace: argocd
+  imagePullSecret:
+    # If `create` is true, will create a secret in the Argo CD namespace using the same credentials as in
+    # .Values.imagePullSecret
+    create: true
+    name: "" # if empty, will be generated using fullname template
+debug: false
+deploymentType: testing  # passed to Django and NextJs; typically production, staging, testing or development
+environment: test  # not passed to the applications; used for URLs; typically prod, staging, test or dev
+# baseDomain is used for constructing the deployment domain. By default, we set up:
+# - domain for the backend admin interface (override with backendAdminHostOverride)
+# - domain for the backend API (override with backendApiHostOverride)
+# - domain for UI deployments (override with backendUiDeploymentOverride)
+baseDomain: kausal.dev
+deploymentDomainOverride: "" # if empty, the deployment domain is paths.<environment>.<baseDomain>
+backendAdminHostOverride: "" # if empty, the backend admin host is admin.<deployment_domain>
+backendApiHostOverride: "" # if empty, the backend API host is api.<deployment_domain>
+uiDeploymentHostOverride: "" # if empty, the UI deployment host is *.paths.<deployment_domain> (wildcard domain)
+imagePullSecret:
+  create: true
+  name: docker-registry # if empty, will be generated using fullname template
+  registry: docker.kausal.tech
+  username: docker
+  password: ""
+db:
+  database: paths
+  user: paths
+  password: ""
+  secret:
+    create: true
+    name: db-credentials # if empty, will be generated using fullname template
+  # BB: I tried using postgis even though it's not required in case we need it later. Unfortunately the KP backend
+  # Docker image lacks the gdal-bin package, so we get an error. I don't feel like changing the Dockerfile and
+  # rebuilding everything, so we use Postgres without GIS for now.
+  postgis: false
+  cluster:
+    create: true
+    name: db-cluster # if empty, will be generated using fullname template
+backend:
+  django:
+    argoCdApplication:
+      create: true
+      name: "" # if empty, will be generated using fullname template
+      enableAutoSync: true
+    service: "" # if empty, assume the service is created by Argo CD and use the expected name
+    image:
+      repository: docker.kausal.tech/paths
+      tag: testing-latest
+    envSecret:
+      create: true
+      name: django-env # if empty, will be generated using fullname template
+    sentry:
+      enable: false
+      dsn: https://7be5d704fb5744139f08b8418b5d0fac@sentry.kausal.tech/6
+    secretKey: ""
+    awsAccessKeyId: ""
+    awsSecretAccessKey: ""
+  ingress:
+    name: backend # if empty, will be generated using fullname template
+    externalDnsTarget: de-dev-lb.de.kausal.dev
+    tlsSecretName: "" # if empty, will be generated using fullname template
+  redis:
+    argoCdApplication:
+      create: true
+      name: "" # if empty, will be generated using fullname template
+      enableAutoSync: true
+    service: "" # if empty, assume the service is created by Argo CD and use the expected name
+ui:
+  nextjs:
+    argoCdApplication:
+      create: true
+      name: "" # if empty, will be generated using fullname template
+      enableAutoSync: true
+    service: "" # if empty, assume the service is created by Argo CD and use the expected name
+    image:
+      repository: docker.kausal.tech/paths-ui
+      tag: testing-latest
+      pullPolicy: Always # better set to IfNotPresent for immutable tags
+    sentry:
+      enable: false
+      dsn: https://cf7003ffbd0a4b63b1e24243f796e227@sentry.kausal.tech/7
+  ingress:
+    name: ui # if empty, will be generated using fullname template
+    externalDnsTarget: de-dev-lb.de.kausal.dev
+    tlsSecretName: "" # if empty, will be generated using fullname template

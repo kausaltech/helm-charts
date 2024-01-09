@@ -1,0 +1,45 @@
+{{- if .Values.ui.nextjs.argoCdApplication.create -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ include "paths.uiNextjsArgoCdApplicationName" . }}
+  namespace: {{ .Values.argoCd.namespace }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd-image-updater.argoproj.io/app.pull-secret: pullsecret:{{ .Values.argoCd.namespace }}/{{ .Values.argoCd.imagePullSecret.name }}
+    argocd-image-updater.argoproj.io/app.update-strategy: digest # this assumes mutable tags; for immutable tags, better use semver
+    argocd-image-updater.argoproj.io/image-list: app={{ .Values.ui.nextjs.image.repository }}:{{ .Values.ui.nextjs.image.tag }}
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/kausaltech/helm-charts.git
+    path: nextjs-helm
+    targetRevision: HEAD
+    helm:
+      values: |-
+        replicaCount: 3
+        image:
+          repository: {{ .Values.ui.nextjs.image.repository }}
+          tag: {{ .Values.ui.nextjs.image.tag }}
+          pullPolicy: {{ .Values.ui.nextjs.image.pullPolicy }}
+        imagePullSecrets:
+          - name: {{ include "paths.imagePullSecretName" . }}
+        configmap:
+          data:
+            DEPLOYMENT_TYPE: {{ .Values.deploymentType }}
+            DEFAULT_GRAPHQL_API_URL: https://{{ include "paths.backendApiHost" . }}/v1/graphql/
+            {{- if .Values.ui.nextjs.sentry.enable }}
+            SENTRY_DSN: {{ .Values.ui.nextjs.sentry.dsn }}
+            {{- end }}
+        ingress:
+          enabled: false
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: {{ .Release.Namespace }}
+  {{- if .Values.ui.nextjs.argoCdApplication.enableAutoSync }}
+  syncPolicy:
+    automated:
+      prune: true
+  {{- end -}}
+{{- end -}}

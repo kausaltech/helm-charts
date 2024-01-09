@@ -1,0 +1,31 @@
+{{- if .Values.backend.redis.argoCdApplication.create -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ include "paths.backendRedisArgoCdApplicationName" . }}
+  namespace: {{ .Values.argoCd.namespace }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://charts.bitnami.com/bitnami
+    chart: redis
+    targetRevision: 18.6.2
+    helm:
+      valuesObject:
+        architecture: standalone
+        auth:
+          enabled: false
+        master:
+          persistence:
+            enabled: false
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: {{ .Release.Namespace }}
+  {{- if .Values.backend.redis.argoCdApplication.enableAutoSync }}
+  syncPolicy:
+    automated:
+      prune: true
+  {{- end -}}
+{{- end -}}
