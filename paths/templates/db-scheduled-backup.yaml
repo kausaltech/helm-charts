@@ -1,0 +1,12 @@
+{{- if .Values.db.scheduledBackup.create -}}
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: {{ include "paths.dbScheduledBackupName" . }}
+spec:
+  schedule: "0 0 0 * * *"
+  backupOwnerReference: self
+  cluster:
+    name: {{ include "paths.dbClusterName" . }}
+  immediate: true  # TODO: remove after testing
+{{- end -}}

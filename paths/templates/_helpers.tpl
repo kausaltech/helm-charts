@@ -101,6 +101,14 @@ https://helm.sh/docs/howto/charts_tips_and_tricks/#creating-image-pull-secrets
 {{- printf "%s-rw" (include "paths.dbClusterName" .) }}
 {{- end }}
 
+{{- define "paths.dbScheduledBackupName" -}}
+{{- default (printf "%s-backup" (include "paths.fullname" .)) .Values.db.scheduledBackup.name }}
+{{- end }}
+
+{{- define "paths.dbBackupS3SecretName" -}}
+{{- default (printf "%s-db-backup-s3" (include "paths.fullname" .)) .Values.db.cluster.backup.s3Secret.name }}
+{{- end }}
+
 {{- define "paths.deploymentDomain" -}}
 {{- default (printf "paths.%s.%s" .Values.environment .Values.baseDomain) .Values.deploymentDomainOverride }}
 {{- end }}

@@ -26,6 +26,19 @@ spec:
   # - supervised: requires manual supervision to perform
   #               the switchover of the primary
   primaryUpdateStrategy: unsupervised
+  backup:
+    target: prefer-standby
+    retentionPolicy: "30d"
+    barmanObjectStore:
+      destinationPath: {{ .Values.db.cluster.backup.destinationPath }}
+      endpointURL: {{ .Values.db.cluster.backup.endpointUrl }}
+      s3Credentials:
+        accessKeyId:
+          name: {{ include "paths.dbBackupS3SecretName" . }}
+          key: AWS_ACCESS_KEY_ID
+        secretAccessKey:
+          name: {{ include "paths.dbBackupS3SecretName" . }}
+          key: AWS_SECRET_ACCESS_KEY
   storage:
     size: 1Gi
 {{- end -}}
