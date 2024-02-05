@@ -39,14 +39,14 @@ db:
     name: db-cluster # if empty, will be generated using fullname template
     backup:
       s3Secret:
-        create: true
+        create: false
         name: db-backup-s3 # if empty, will be generated using fullname template
         awsAccessKeyId: ""
         awsSecretAccessKey: ""
       endpointUrl: https://s3.kausal.tech
       destinationPath: s3://paths-db-backups
   scheduledBackup:
-    create: true
+    create: false
     name: db-backup # if empty, will be generated using fullname template
 backend:
   django:
