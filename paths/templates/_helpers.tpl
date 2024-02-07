@@ -82,11 +82,11 @@ https://helm.sh/docs/howto/charts_tips_and_tricks/#creating-image-pull-secrets
 {{- end }}
 
 {{- define "paths.uiIngressName" -}}
-{{- default (printf "%s-ui" (include "paths.fullname" .)) .Values.ui.ingress.name }}
+{{- default (printf "%s-ui" (include "paths.fullname" .)) .Values.ui.nextjs.ingress.name }}
 {{- end }}
 
 {{- define "paths.uiIngressTlsSecretName" -}}
-{{- default (printf "%s-ui-tls" (include "paths.fullname" .)) .Values.ui.ingress.tlsSecretName }}
+{{- default (printf "%s-ui-tls" (include "paths.fullname" .)) .Values.ui.nextjs.ingress.tlsSecretName }}
 {{- end }}
 
 {{- define "paths.dbUrlScheme" -}}

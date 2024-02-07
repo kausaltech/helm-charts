@@ -62,7 +62,7 @@ backend:
       create: true
       name: django-env # if empty, will be generated using fullname template
     sentry:
-      enable: false
+      enabled: false
       dsn: https://7be5d704fb5744139f08b8418b5d0fac@sentry.kausal.tech/6
     secretKey: ""
     awsAccessKeyId: ""
@@ -89,9 +89,9 @@ ui:
       tag: testing-latest
       pullPolicy: Always # better set to IfNotPresent for immutable tags
     sentry:
-      enable: false
+      enabled: false
       dsn: https://cf7003ffbd0a4b63b1e24243f796e227@sentry.kausal.tech/7
-  ingress:
-    name: ui # if empty, will be generated using fullname template
-    externalDnsTarget: de-dev-lb.de.kausal.dev
-    tlsSecretName: "" # if empty, will be generated using fullname template
+    ingress:
+      name: ui # if empty, will be generated using fullname template
+      externalDnsTarget: de-dev-lb.de.kausal.dev
+      tlsSecretName: "" # if empty, will be generated using fullname template

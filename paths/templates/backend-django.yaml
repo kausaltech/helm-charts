@@ -38,7 +38,7 @@ spec:
             # PYTHONIOENCODING: utf-8  # Probably it's better to set the locale (line below)
             LC_CTYPE: C.UTF-8
             CONFIGURE_LOGGING: 1
-            {{- if .Values.backend.django.sentry.enable }}
+            {{- if .Values.backend.django.sentry.enabled }}
             SENTRY_DSN: {{ .Values.backend.django.sentry.dsn }}
             {{- end }}
         envSecretsFrom: {{ include "paths.backendDjangoEnvSecretName" . }}
