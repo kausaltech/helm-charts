@@ -14,8 +14,9 @@ spec:
   project: default
   source:
     repoURL: https://github.com/kausaltech/helm-charts.git
-    path: django-helm
-    targetRevision: HEAD
+    path: django
+    # targetRevision: HEAD
+    targetRevision: wip/paths-test-helm  # FIXME: Set to HEAD after testing
     helm:
       values: |-
         image:

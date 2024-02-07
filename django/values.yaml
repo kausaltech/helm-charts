@@ -188,3 +188,11 @@ collectstaticJob:
 
 migrateJob:
   enabled: false
+
+redis:
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: false

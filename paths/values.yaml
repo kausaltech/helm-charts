@@ -71,12 +71,7 @@ backend:
     name: backend # if empty, will be generated using fullname template
     externalDnsTarget: de-dev-lb.de.kausal.dev
     tlsSecretName: "" # if empty, will be generated using fullname template
-  redis:
-    argoCdApplication:
-      create: true
-      name: "" # if empty, will be generated using fullname template
-      enableAutoSync: true
-    service: "" # if empty, assume the service is created by Argo CD and use the expected name
+  redisService: "" # if empty, will be generated using fullname template
 ui:
   nextjs:
     argoCdApplication:
