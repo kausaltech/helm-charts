@@ -67,10 +67,10 @@ backend:
     secretKey: ""
     awsAccessKeyId: ""
     awsSecretAccessKey: ""
-  ingress:
-    name: backend # if empty, will be generated using fullname template
-    externalDnsTarget: de-dev-lb.de.kausal.dev
-    tlsSecretName: "" # if empty, will be generated using fullname template
+    ingress:
+      externalDnsTarget: de-dev-lb.de.kausal.dev
+      tlsSecretName: "" # if empty, will be generated using fullname template
+  adminRedirectMiddlewareName: backend-redirectregex-admin # if empty, will be generated using fullname template
   redisService: "" # if empty, will be generated using fullname template
 ui:
   nextjs:
@@ -87,6 +87,5 @@ ui:
       enabled: false
       dsn: https://cf7003ffbd0a4b63b1e24243f796e227@sentry.kausal.tech/7
     ingress:
-      name: ui # if empty, will be generated using fullname template
       externalDnsTarget: de-dev-lb.de.kausal.dev
       tlsSecretName: "" # if empty, will be generated using fullname template

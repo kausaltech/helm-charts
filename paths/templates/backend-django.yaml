@@ -57,6 +57,26 @@ spec:
             '--static-map', '/media=/srv/media',
             '--module', 'paths.wsgi',
             ]
+          ingress:
+            enabled: true
+            annotations:
+              cert-manager.io/cluster-issuer: lets-encrypt
+              external-dns.alpha.kubernetes.io/target: {{ .Values.backend.django.ingress.externalDnsTarget }}
+              traefik.ingress.kubernetes.io/router.middlewares: {{ print .Release.Namespace "-" (include "paths.backendAdminRedirectMiddlewareName" .) "@kubernetescrd" }}
+            hosts:
+              - host: "{{ include "paths.backendAdminHost" . }}"
+                paths:
+                  - path: /
+                    pathType: Prefix
+              - host: "{{ include "paths.backendApiHost" . }}"
+                paths:
+                  - path: /
+                    pathType: Prefix
+            tls:
+              - hosts:
+                  - {{ include "paths.backendAdminHost" . }}
+                  - {{ include "paths.backendApiHost" . }}
+                secretName: {{ include "paths.backendIngressTlsSecretName" . }}
         migrateJob:
           enabled: true
   destination:

@@ -61,12 +61,10 @@ https://helm.sh/docs/howto/charts_tips_and_tricks/#creating-image-pull-secrets
 {{- default (printf "%s-redis-master" (include "paths.fullname" .)) .Values.backend.redisService }}
 {{- end }}
 
-{{- define "paths.backendIngressName" -}}
-{{- default (printf "%s-backend" (include "paths.fullname" .)) .Values.backend.ingress.name }}
 {{- end }}
 
 {{- define "paths.backendIngressTlsSecretName" -}}
-{{- default (printf "%s-backend-tls" (include "paths.fullname" .)) .Values.backend.ingress.tlsSecretName }}
+{{- default (printf "%s-backend-tls" (include "paths.fullname" .)) .Values.backend.django.ingress.tlsSecretName }}
 {{- end }}
 
 {{- define "paths.uiNextjsArgoCdApplicationName" -}}
@@ -75,10 +73,6 @@ https://helm.sh/docs/howto/charts_tips_and_tricks/#creating-image-pull-secrets
 
 {{- define "paths.uiNextjsServiceName" -}}
 {{- default (printf "%s-nextjs" (include "paths.uiNextjsArgoCdApplicationName" .)) .Values.ui.nextjs.service }}
-{{- end }}
-
-{{- define "paths.uiIngressName" -}}
-{{- default (printf "%s-ui" (include "paths.fullname" .)) .Values.ui.nextjs.ingress.name }}
 {{- end }}
 
 {{- define "paths.uiIngressTlsSecretName" -}}
