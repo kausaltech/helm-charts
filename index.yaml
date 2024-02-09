@@ -3,7 +3,7 @@ entries:
   dex-operator:
   - apiVersion: v2
     appVersion: v0.1.0
-    created: "2024-02-09T15:29:45.007989221+01:00"
+    created: "2024-02-09T16:44:19.810352932+01:00"
     description: A Helm chart for Kubernetes
     digest: da168724c951f6f496b387adfa078f3c2a230f8d57040ac88db47f44d745dd2b
     name: dex-operator
@@ -13,20 +13,20 @@ entries:
     version: 0.1.0
   django:
   - apiVersion: v2
-    created: "2024-02-09T15:29:45.01593042+01:00"
+    created: "2024-02-09T16:44:19.816906131+01:00"
     dependencies:
     - name: redis
       repository: https://charts.bitnami.com/bitnami
       version: 18.6.2
     description: Django server
-    digest: 1523d077fe6e72f8eb0bf6393683fccb339ee3bdf004e6f6b2a5257bb05b1f0a
+    digest: cf11a10736f47b0510bb9e070111091349afa2c473b3314b96b10ce79ed1cdc0
     name: django
     type: application
     urls:
     - https://kausaltech.github.io/helm-charts/charts/django-0.1.2.tgz
     version: 0.1.2
   - apiVersion: v2
-    created: "2024-02-09T15:29:45.009875861+01:00"
+    created: "2024-02-09T16:44:19.811649407+01:00"
     description: Django server
     digest: b9fd1e4ac66154e64681917d27929fbab4c16b2c0294671d13f739735ed27c41
     name: django
@@ -35,7 +35,7 @@ entries:
     - https://kausaltech.github.io/helm-charts/charts/django-0.1.1.tgz
     version: 0.1.1
   - apiVersion: v2
-    created: "2024-02-09T15:29:45.008768719+01:00"
+    created: "2024-02-09T16:44:19.811031859+01:00"
     description: A Helm chart for Kubernetes
     digest: 5158afe073d5c21519d951458d26533ed260fbb70d55f90651e0249259c38e17
     name: django
@@ -45,9 +45,9 @@ entries:
     version: 0.1.0
   nextjs:
   - apiVersion: v2
-    created: "2024-02-09T15:29:45.016270503+01:00"
+    created: "2024-02-09T16:44:19.817181121+01:00"
     description: A Helm chart for Kubernetes
-    digest: 8745f5b134b9eb4e9dd2f38c17d77eda0a94344f51d2907e60cd3c2c4b28ee0e
+    digest: 2ae1767f9c9c58a5edc6d81a8570d1b66595e12fa6352f69e62625ac23fdb93a
     name: nextjs
     type: application
     urls:
@@ -55,7 +55,7 @@ entries:
     version: 0.1.0
   nextjs-helm:
   - apiVersion: v2
-    created: "2024-02-09T15:29:45.016568083+01:00"
+    created: "2024-02-09T16:44:19.817442062+01:00"
     description: A Helm chart for Kubernetes
     digest: b442d47b3033d5f30135bf63829717cb087d7fb4352efe2736a3dfc1ef4023a7
     name: nextjs-helm
@@ -63,4 +63,4 @@ entries:
     urls:
     - https://kausaltech.github.io/helm-charts/charts/nextjs-helm-0.1.0.tgz
     version: 0.1.0
-generated: "2024-02-09T15:29:45.007507156+01:00"
+generated: "2024-02-09T16:44:19.809839317+01:00"

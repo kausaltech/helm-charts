@@ -196,3 +196,26 @@ redis:
   master:
     persistence:
       enabled: false
+
+db:
+  database: django
+  user: django
+  password: ""
+  secret:
+    create: true
+    name: db-credentials # if empty, will be generated using fullname template
+  postgis: false
+  cluster:
+    create: true
+    name: db-cluster # if empty, will be generated using fullname template
+    backup:
+      s3Secret:
+        create: false
+        name: db-backup-s3 # if empty, will be generated using fullname template
+        awsAccessKeyId: ""
+        awsSecretAccessKey: ""
+      endpointUrl: ""
+      destinationPath: ""
+  scheduledBackup:
+    create: false
+    name: db-backup # if empty, will be generated using fullname template

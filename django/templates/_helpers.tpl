@@ -61,3 +61,19 @@ Create the name of the service account to use
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
+
+{{- define "django-helm.dbClusterName" -}}
+{{- default (include "django-helm.fullname" .) .Values.db.cluster.name }}
+{{- end }}
+
+{{- define "django-helm.dbSecretName" -}}
+{{- default (printf "%s-db-credentials" (include "django-helm.fullname" .)) .Values.db.secret.name }}
+{{- end }}
+
+{{- define "django-helm.dbBackupS3SecretName" -}}
+{{- default (printf "%s-db-backup-s3" (include "django-helm.fullname" .)) .Values.db.cluster.backup.s3Secret.name }}
+{{- end }}
+
+{{- define "django-helm.dbScheduledBackupName" -}}
+{{- default (printf "%s-backup" (include "django-helm.fullname" .)) .Values.db.scheduledBackup.name }}
+{{- end }}

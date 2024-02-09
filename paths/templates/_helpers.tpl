@@ -41,10 +41,6 @@ https://helm.sh/docs/howto/charts_tips_and_tricks/#creating-image-pull-secrets
 {{- default (printf "%s-docker-registry" (include "paths.fullname" .)) .Values.argoCd.imagePullSecret.name }}
 {{- end }}
 
-{{- define "paths.dbSecretName" -}}
-{{- default (printf "%s-db-credentials" (include "paths.fullname" .)) .Values.db.secret.name }}
-{{- end }}
-
 {{- define "paths.backendDjangoEnvSecretName" -}}
 {{- default (printf "%s-django-env" (include "paths.fullname" .)) .Values.backend.django.envSecret.name }}
 {{- end }}
@@ -85,20 +81,8 @@ https://helm.sh/docs/howto/charts_tips_and_tricks/#creating-image-pull-secrets
 {{- if .Values.db.postgis }}postgis{{ else }}postgresql{{ end }}
 {{- end }}
 
-{{- define "paths.dbClusterName" -}}
-{{- default (include "paths.fullname" .) .Values.db.cluster.name }}
-{{- end }}
-
 {{- define "paths.dbClusterRwServiceName" -}}
 {{- printf "%s-rw" (include "paths.dbClusterName" .) }}
-{{- end }}
-
-{{- define "paths.dbScheduledBackupName" -}}
-{{- default (printf "%s-backup" (include "paths.fullname" .)) .Values.db.scheduledBackup.name }}
-{{- end }}
-
-{{- define "paths.dbBackupS3SecretName" -}}
-{{- default (printf "%s-db-backup-s3" (include "paths.fullname" .)) .Values.db.cluster.backup.s3Secret.name }}
 {{- end }}
 
 {{- define "paths.deploymentDomain" -}}

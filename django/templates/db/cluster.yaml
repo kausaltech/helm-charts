@@ -2,7 +2,7 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: {{ include "paths.dbClusterName" . }}
+  name: {{ include "django-helm.dbClusterName" . }}
 spec:
   instances: 3
   {{- if .Values.db.postgis }}
@@ -15,7 +15,7 @@ spec:
       database: {{ .Values.db.database }}
       owner: {{ .Values.db.user }}
       secret:
-        name: {{ include "paths.dbSecretName" . }}
+        name: {{ include "django-helm.dbSecretName" . }}
       {{- if .Values.db.postgis }}
       postInitTemplateSQL:
         - CREATE EXTENSION postgis;
@@ -34,10 +34,10 @@ spec:
       endpointURL: {{ .Values.db.cluster.backup.endpointUrl }}
       s3Credentials:
         accessKeyId:
-          name: {{ include "paths.dbBackupS3SecretName" . }}
+          name: {{ include "django-helm.dbBackupS3SecretName" . }}
           key: AWS_ACCESS_KEY_ID
         secretAccessKey:
-          name: {{ include "paths.dbBackupS3SecretName" . }}
+          name: {{ include "django-helm.dbBackupS3SecretName" . }}
           key: AWS_SECRET_ACCESS_KEY
   storage:
     size: 1Gi
