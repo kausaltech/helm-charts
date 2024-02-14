@@ -2,11 +2,11 @@
 apiVersion: postgresql.cnpg.io/v1
 kind: ScheduledBackup
 metadata:
-  name: {{ include "django-helm.dbScheduledBackupName" . }}
+  name: {{ include "django.dbScheduledBackupName" . }}
 spec:
   schedule: "0 0 0 * * *"
   backupOwnerReference: self
   cluster:
-    name: {{ include "django-helm.dbClusterName" . }}
+    name: {{ include "django.dbClusterName" . }}
   # immediate: true  # may be useful for testing
 {{- end -}}
