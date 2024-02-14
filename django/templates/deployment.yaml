@@ -4,6 +4,7 @@ metadata:
   name: {{ include "django.fullname" . }}
   labels:
     {{- include "django.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ include "django.fullname" . }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
@@ -11,7 +12,8 @@ spec:
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   selector:
     matchLabels:
-      {{- include "django.selectorLabels" . | nindent 6 }}
+      {{- include "django.labels" . | nindent 6 }}
+      app.kubernetes.io/component: {{ include "django.fullname" . }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -19,7 +21,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "django.selectorLabels" . | nindent 8 }}
+        {{- include "django.labels" . | nindent 8 }}
         app.kubernetes.io/component: {{ include "django.fullname" . }}
     spec:
       {{- with .Values.imagePullSecrets }}
@@ -39,7 +41,7 @@ spec:
               - -c
               - >-
                   {{ .Values.collect_static.command }}
-          {{- if or .Values.envSecrets .Values.envConfigs }} 
+          {{- if or .Values.envSecrets .Values.envConfigs }}
           envFrom:
             {{- if .Values.envSecrets }}
             - secretRef:
@@ -69,7 +71,8 @@ spec:
           {{- end }}
           {{- include "django.envVariables" . | nindent 10 }}
           ports:
-            - containerPort: {{ .Values.image.containerPort }}
+            - name: django
+              containerPort: {{ .Values.image.containerPort }}
               protocol: TCP
         {{- with .Values.probes }}
           {{- if .liveness.enabled }}
@@ -88,13 +91,13 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 
+        {{- if .Values.proxy.enabled }}
         - name: {{ printf "%s-%s" .Chart.Name "proxy" }}
-          image:  "{{ .Values.proxy.repository }}:{{ .Values.image.tag }}"
+          image:  "{{ .Values.proxy.repository }}:{{ .Values.proxy.tag }}"
           ports:
             - name: http
               containerPort: {{ .Values.proxy.containerPort }}
               protocol: TCP
-              
           volumeMounts:
             - name: caddy-config
               mountPath: /etc/caddy/Caddyfile
@@ -103,10 +106,13 @@ spec:
               mountPath: /srv/{{ .Values.data.staticfiles }}
             - name: shared
               mountPath: /srv/{{ .Values.data.data_media }}
+        {{- end }}
       volumes:
+        {{- if .Values.proxy.enabled }}
         - name: caddy-config
           configMap:
             name: caddy-config
+        {{- end }}
         - name: shared
           emptyDir: {}
 

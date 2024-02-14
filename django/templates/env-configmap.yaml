@@ -9,6 +9,6 @@ metadata:
     helm.sh/hook-delete-policy: before-hook-creation
 data:
 {{-  with .Values.envConfigs }}
-    {{ toYaml . | nindent 4 }}
+  {{- toYaml . | nindent 2 }}
 {{- end }}
 {{- end }}

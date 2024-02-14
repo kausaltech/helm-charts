@@ -1,3 +1,4 @@
+{{- if .Values.proxy.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -23,3 +24,4 @@ data:
         }
 
     reverse_proxy :{{ .Values.image.containerPort }}
+{{- end -}}

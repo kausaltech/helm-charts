@@ -26,6 +26,9 @@ spec:
   # - supervised: requires manual supervision to perform
   #               the switchover of the primary
   primaryUpdateStrategy: unsupervised
+  storage:
+    size: 1Gi
+  {{- if .Values.db.cluster.backup.enabled }}
   backup:
     target: prefer-standby
     retentionPolicy: "30d"
@@ -39,6 +42,5 @@ spec:
         secretAccessKey:
           name: {{ include "django.dbBackupS3SecretName" . }}
           key: AWS_SECRET_ACCESS_KEY
-  storage:
-    size: 1Gi
+  {{- end }}
 {{- end -}}

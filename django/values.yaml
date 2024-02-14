@@ -47,29 +47,24 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-
-
 # Django Service Values
 service:
   type: ClusterIP
-  port: 80
+  port: 8000
 
-#Caddy Settings ( Proxy Setup )
+# Caddy Settings (Proxy Setup)
 proxy:
+  enabled: false
   repository: caddy
   pullPolicy: IfNotPresent
   tag: "2.1.1-alpine"
   containerPort: 8000
 
-
 # Env ConfigMap values
-envConfigs:
- STATIC_ROOT: "staticfiles"
- CELERY_BROKER_URL: ""
+envConfigs: {}
 
 # Env Secret Values (as plain text, not base64-encoded)
 envSecrets: {}
-
 
 # Django Ingress Values
 ingress:
@@ -85,25 +80,26 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-
 celery:
 # Celery Beat Values
   beat:
-    enabled: true
+    enabled: false
     componentName: celery-beat
-    command: "celery -A blog.celery beat -l DEBUG"
+    command: "celery -A app.celery beat -l DEBUG"
     replicaCount: 1
     strategy: Recreate
 # Celery Worker Settings
   worker:
+    enabled: false
     componentName: celery-worker
-    command: "celery -A blog.celery worker -l DEBUG"
+    command: "celery -A app.celery worker -l DEBUG"
     replicaCount: 1
     strategy: RollingUpdate
 # Celery Flower Settings
   flower:
+    enabled: false
     componentName: celery-flower
-    command: "celery -A blog.celery flower"
+    command: "celery -A app.celery flower"
     replicaCount: 1
     strategy: RollingUpdate
     service:
@@ -147,9 +143,6 @@ redis:
     enabled: true
     runAsUser: 1001
 
-
-
-
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
@@ -171,7 +164,6 @@ securityContext: {}
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
   # runAsUser: 1000
-
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -210,6 +202,7 @@ db:
     create: true
     name: db-cluster # if empty, will be generated using fullname template
     backup:
+      enabled: false
       s3Secret:
         create: false
         name: db-backup-s3 # if empty, will be generated using fullname template
