@@ -13,9 +13,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/kausaltech/helm-charts.git
-    path: nextjs-helm
-    targetRevision: HEAD
+    repoURL: {{ .Values.helmChartRepoUrl }}
+    path: {{ .Values.ui.nextjs.helmChartRepoPath }}
+    targetRevision: {{ .Values.ui.nextjs.helmChartRepoTargetRevision }}
     helm:
       values: |-
         fullnameOverride: nextjs
@@ -58,5 +58,5 @@ spec:
   syncPolicy:
     automated:
       prune: true
-  {{- end -}}
+  {{- end }}
 {{- end -}}

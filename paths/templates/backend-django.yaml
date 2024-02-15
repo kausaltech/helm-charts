@@ -1,6 +1,4 @@
 {{- if .Values.backend.django.argoCdApplication.create -}}
-{{- /* TODO: Could we move this to _helpers.tpl in the django chart (or a library chart) and call that from here? */}}
-{{- $dbUrl := printf "%s://%s:%s@%s/%s" (include "paths.dbUrlScheme" .) .Values.backend.django.db.user .Values.backend.django.db.password (include "paths.dbClusterRwServiceName" .) .Values.backend.django.db.database -}}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -15,12 +13,12 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/kausaltech/helm-charts.git
-    path: django
-    # targetRevision: HEAD
-    targetRevision: wip/paths-test-helm  # FIXME: Set to HEAD after testing
+    repoURL: {{ .Values.helmChartRepoUrl }}
+    path: {{ .Values.backend.django.helmChartRepoPath }}
+    targetRevision: {{ .Values.backend.django.helmChartRepoTargetRevision }}
     helm:
       values: |-
+        fullnameOverride: django
         replicaCount: 3
         image:
           repository: {{ .Values.backend.django.image.repository }}
@@ -30,7 +28,6 @@ spec:
         imagePullSecrets:
           - name: {{ include "paths.imagePullSecretName" . }}
         envConfigs:
-          # For KP:
           DJANGO_SETTINGS_MODULE: paths.settings
           DEBUG: "{{ if .Values.debug }}1{{ else }}0{{ end }}"
           DEPLOYMENT_TYPE: {{ .Values.deploymentType }}
@@ -48,11 +45,9 @@ spec:
           SENTRY_DSN: {{ .Values.backend.django.sentry.dsn }}
           {{- end }}
         envSecrets:
-          # For KP:
-          # DATABASE_URL: {{ $dbUrl | b64enc }}  # If it were b64-encoded...
-          DATABASE_URL: {{ $dbUrl }}
+          DATABASE_URL: "postgresql://{{ .Values.backend.django.db.user }}:{{ .Values.backend.django.db.password }}@db-cluster-rw/{{ .Values.backend.django.db.database }}"
           POSTGRES_PASSWORD: {{ .Values.backend.django.db.password }}
-          SECRET_KEY: {{ .Values.backend.django.secretKey }}
+          SECRET_KEY: {{ include "paths.backendDjangoSecretKey" . }}
           AWS_ACCESS_KEY_ID: {{ .Values.backend.django.awsAccessKeyId }}
           AWS_SECRET_ACCESS_KEY: {{ .Values.backend.django.awsSecretAccessKey }}
         ingress:
@@ -84,9 +79,8 @@ spec:
               s3Secret:
                 awsAccessKeyId: {{ .Values.backend.django.db.cluster.backup.s3Secret.awsAccessKeyId }}
                 awsSecretAccessKey: {{ .Values.backend.django.db.cluster.backup.s3Secret.awsSecretAccessKey }}
-              endpointUrl: https://s3.kausal.tech
-              destinationPath: s3://paths-db-backups
-        fullnameOverride: django
+              endpointUrl: {{ .Values.backend.django.db.cluster.backup.endpointUrl }}
+              destinationPath: {{ .Values.backend.django.db.cluster.backup.destinationPath }}
         redis:
           fullnameOverride: redis
           architecture: standalone  # default: replication
@@ -108,4 +102,4 @@ spec:
     automated:
       prune: true
   {{- end }}
-{{- end }}
+{{- end -}}

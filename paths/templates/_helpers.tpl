@@ -77,14 +77,6 @@ https://helm.sh/docs/howto/charts_tips_and_tricks/#creating-image-pull-secrets
 {{- default (printf "*.%s" (include "paths.deploymentDomain" .)) .Values.uiDeploymentHostOverride }}
 {{- end }}
 
-# FIXME: The following are duplicated from the django chart. Create a library chart for them?
-{{- define "paths.dbClusterRwServiceName" -}}
-{{/* {{- printf "%s-rw" (include "paths.dbClusterName" .) }} */}}
-{{- printf "db-cluster-rw" }}
-{{- end }}
-{{/* {{- define "paths.dbClusterName" -}} */}}
-{{/* {{- default (include "paths.fullname" .) .Values.backend.django.db.cluster.name }} */}}
-{{/* {{- end }} */}}
-{{- define "paths.dbUrlScheme" -}}
-{{- if .Values.backend.django.db.postgis }}postgis{{ else }}postgresql{{ end }}
+{{- define "paths.backendDjangoSecretKey" -}}
+{{- .Values.backend.django.secretKey | default (randAlphaNum 64) }}
 {{- end }}

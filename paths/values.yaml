@@ -1,3 +1,4 @@
+helmChartRepoUrl: https://github.com/kausaltech/helm-charts.git
 argoCd:
   namespace: argocd
   imagePullSecret:
@@ -25,6 +26,8 @@ imagePullSecret:
   password: ""
 backend:
   django:
+    helmChartRepoPath: django
+    helmChartRepoTargetRevision: HEAD
     argoCdApplication:
       create: true
       name: "" # if empty, will be generated using fullname template
@@ -48,16 +51,20 @@ backend:
           s3Secret:
             awsAccessKeyId: ""
             awsSecretAccessKey: ""
+          endpointUrl: https://s3.kausal.tech
+          destinationPath: s3://paths-db-backups
       scheduledBackup:
         create: false
     dbMigrations:
       enabled: true
-    secretKey: ""  # FIXME: auto-generate?
+    secretKey: ""  # if empty, will be generated
     awsAccessKeyId: ""
     awsSecretAccessKey: ""
   adminRedirectMiddlewareName: backend-redirectregex-admin # if empty, will be generated using fullname template
 ui:
   nextjs:
+    helmChartRepoPath: nextjs
+    helmChartRepoTargetRevision: HEAD
     argoCdApplication:
       create: true
       name: "" # if empty, will be generated using fullname template
