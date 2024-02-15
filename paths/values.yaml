@@ -23,53 +23,33 @@ imagePullSecret:
   registry: docker.kausal.tech
   username: docker
   password: ""
-db:
-  database: paths
-  user: paths
-  password: ""
-  secret:
-    create: true
-    name: db-credentials # if empty, will be generated using fullname template
-  # BB: I tried using postgis even though it's not required in case we need it later. Unfortunately the KP backend
-  # Docker image lacks the gdal-bin package, so we get an error. I don't feel like changing the Dockerfile and
-  # rebuilding everything, so we use Postgres without GIS for now.
-  postgis: false
-  cluster:
-    create: true
-    name: db-cluster # if empty, will be generated using fullname template
-    backup:
-      s3Secret:
-        create: false
-        name: db-backup-s3 # if empty, will be generated using fullname template
-        awsAccessKeyId: ""
-        awsSecretAccessKey: ""
-      endpointUrl: https://s3.kausal.tech
-      destinationPath: s3://paths-db-backups
-  scheduledBackup:
-    create: false
-    name: db-backup # if empty, will be generated using fullname template
 backend:
   django:
     argoCdApplication:
       create: true
       name: "" # if empty, will be generated using fullname template
       enableAutoSync: true
-    service: "" # if empty, assume the service is created by Argo CD and use the expected name
     image:
       repository: docker.kausal.tech/paths
       tag: testing-latest
-    envSecret:
-      create: true
-      name: django-env # if empty, will be generated using fullname template
-    sentry:
-      enabled: false
-      dsn: https://7be5d704fb5744139f08b8418b5d0fac@sentry.kausal.tech/6
-    secretKey: ""
-    awsAccessKeyId: ""
-    awsSecretAccessKey: ""
+    command: "uwsgi --http11-socket :8000 --socket :8001 --processes 8 --enable-threads --buffer-size=32768 --static-map /static=/srv/static --static-map /media=/srv/media --module paths.wsgi"
     ingress:
       externalDnsTarget: de-dev-lb.de.kausal.dev
       tlsSecretName: "" # if empty, will be generated using fullname template
+    sentry:
+      enabled: false
+      dsn: https://7be5d704fb5744139f08b8418b5d0fac@sentry.kausal.tech/6
+    db:
+      database: paths
+      user: paths
+      password: ""
+      cluster:
+        backup:
+          s3Secret:
+            awsAccessKeyId: ""
+            awsSecretAccessKey: ""
+      scheduledBackup:
+        create: false
   adminRedirectMiddlewareName: backend-redirectregex-admin # if empty, will be generated using fullname template
   redisService: "" # if empty, will be generated using fullname template
 ui:
@@ -78,7 +58,6 @@ ui:
       create: true
       name: "" # if empty, will be generated using fullname template
       enableAutoSync: true
-    service: "" # if empty, assume the service is created by Argo CD and use the expected name
     image:
       repository: docker.kausal.tech/paths-ui
       tag: testing-latest

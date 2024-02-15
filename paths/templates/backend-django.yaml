@@ -1,4 +1,6 @@
 {{- if .Values.backend.django.argoCdApplication.create -}}
+{{- /* TODO: Could we move this to _helpers.tpl in the django chart (or a library chart) and call that from here? */}}
+{{- $dbUrl := printf "%s://%s:%s@%s/%s" (include "paths.dbUrlScheme" .) .Values.backend.django.db.user .Values.backend.django.db.password (include "paths.dbClusterRwServiceName" .) .Values.backend.django.db.database -}}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -19,66 +21,81 @@ spec:
     targetRevision: wip/paths-test-helm  # FIXME: Set to HEAD after testing
     helm:
       values: |-
+        replicaCount: 3
         image:
           repository: {{ .Values.backend.django.image.repository }}
           tag: {{ .Values.backend.django.image.tag }}
-          imagePullSecrets:
-            - name: {{ include "paths.imagePullSecretName" . }}
-        configmap:
-          data:
-            DJANGO_SETTINGS_MODULE: paths.settings
-            DEBUG: {{ if .Values.debug }}1{{ else }}0{{ end }}
-            DEPLOYMENT_TYPE: {{ .Values.deploymentType }}
-            ALLOWED_HOSTS: {{ include "paths.backendApiHost" . }},{{ include "paths.backendAdminHost" . }}
-            HOSTNAME_INSTANCE_DOMAINS: {{ include "paths.deploymentDomain" . }}
-            # TODO
-            # MEDIA_FILES_S3_ENDPOINT: TODO
-            # MEDIA_FILES_S3_BUCKET: TODO
-            # MEDIA_FILES_S3_CUSTOM_DOMAIN: TODO
-            REDIS_URL: redis://{{ include "paths.backendRedisServiceName" . }}.{{ .Release.Namespace }}.svc.cluster.local
-            # PYTHONIOENCODING: utf-8  # Probably it's better to set the locale (line below)
-            LC_CTYPE: C.UTF-8
-            CONFIGURE_LOGGING: 1
-            {{- if .Values.backend.django.sentry.enabled }}
-            SENTRY_DSN: {{ .Values.backend.django.sentry.dsn }}
-            {{- end }}
-        envSecretsFrom: {{ include "paths.backendDjangoEnvSecretName" . }}
-        djangoServer:
-          replicaCount: 3
-          # command: ['/bin/bash', '-c', '--', 'while true; do sleep 30; done;']  # Used for debugging the k8s deployment
-          command: [
-            'uwsgi',
-            '--http11-socket', ':8000',
-            '--socket', ':8001',
-            '--processes', '8',
-            '--enable-threads',
-            '--buffer-size=32768',
-            '--static-map', '/static=/srv/static',
-            '--static-map', '/media=/srv/media',
-            '--module', 'paths.wsgi',
-            ]
-          ingress:
-            enabled: true
-            annotations:
-              cert-manager.io/cluster-issuer: lets-encrypt
-              external-dns.alpha.kubernetes.io/target: {{ .Values.backend.django.ingress.externalDnsTarget }}
-              traefik.ingress.kubernetes.io/router.middlewares: {{ print .Release.Namespace "-" (include "paths.backendAdminRedirectMiddlewareName" .) "@kubernetescrd" }}
-            hosts:
-              - host: "{{ include "paths.backendAdminHost" . }}"
-                paths:
-                  - path: /
-                    pathType: Prefix
-              - host: "{{ include "paths.backendApiHost" . }}"
-                paths:
-                  - path: /
-                    pathType: Prefix
-            tls:
-              - hosts:
-                  - {{ include "paths.backendAdminHost" . }}
-                  - {{ include "paths.backendApiHost" . }}
-                secretName: {{ include "paths.backendIngressTlsSecretName" . }}
-        migrateJob:
+        # command: "/bin/bash -c -- while true; do sleep 30; done;"  # useful for debugging the k8s deployment
+        command: {{ .Values.backend.django.command }}
+        imagePullSecrets:
+          - name: {{ include "paths.imagePullSecretName" . }}
+        envConfigs:
+          # For KP:
+          DJANGO_SETTINGS_MODULE: paths.settings
+          DEBUG: "{{ if .Values.debug }}1{{ else }}0{{ end }}"
+          DEPLOYMENT_TYPE: {{ .Values.deploymentType }}
+          ALLOWED_HOSTS: {{ include "paths.backendApiHost" . }},{{ include "paths.backendAdminHost" . }}
+          HOSTNAME_INSTANCE_DOMAINS: {{ include "paths.deploymentDomain" . }}
+          # TODO
+          # MEDIA_FILES_S3_ENDPOINT: TODO
+          # MEDIA_FILES_S3_BUCKET: TODO
+          # MEDIA_FILES_S3_CUSTOM_DOMAIN: TODO
+          REDIS_URL: redis://{{ include "paths.backendRedisServiceName" . }}.{{ .Release.Namespace }}.svc.cluster.local
+          # PYTHONIOENCODING: utf-8  # Probably it's better to set the locale (line below)
+          LC_CTYPE: C.UTF-8
+          CONFIGURE_LOGGING: "1"
+          {{- if .Values.backend.django.sentry.enabled }}
+          SENTRY_DSN: {{ .Values.backend.django.sentry.dsn }}
+          {{- end }}
+        envSecrets:
+          # For KP:
+          # DATABASE_URL: {{ $dbUrl | b64enc }}  # If it were b64-encoded...
+          DATABASE_URL: {{ $dbUrl }}
+          POSTGRES_PASSWORD: {{ .Values.backend.django.db.password }}
+          SECRET_KEY: foobar123
+          # AWS_ACCESS_KEY_ID: ""  # TODO
+          # AWS_SECRET_ACCESS_KEY: ""  # TODO
+        ingress:
           enabled: true
+          annotations:
+            cert-manager.io/cluster-issuer: lets-encrypt
+            external-dns.alpha.kubernetes.io/target: {{ .Values.backend.django.ingress.externalDnsTarget }}
+            traefik.ingress.kubernetes.io/router.middlewares: {{ print .Release.Namespace "-" (include "paths.backendAdminRedirectMiddlewareName" .) "@kubernetescrd" }}
+          hosts:
+            - host: "{{ include "paths.backendAdminHost" . }}"
+              paths:
+                - path: /
+                  pathType: Prefix
+            - host: "{{ include "paths.backendApiHost" . }}"
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls:
+            - hosts:
+                - {{ include "paths.backendAdminHost" . }}
+                - {{ include "paths.backendApiHost" . }}
+              secretName: {{ include "paths.backendIngressTlsSecretName" . }}
+        db:
+          database: {{ .Values.backend.django.db.database }}
+          user: {{ .Values.backend.django.db.user }}
+          password: {{ .Values.backend.django.db.password }}
+          cluster:
+            backup:
+              s3Secret:
+                awsAccessKeyId: {{ .Values.backend.django.db.cluster.backup.s3Secret.awsAccessKeyId }}
+                awsSecretAccessKey: {{ .Values.backend.django.db.cluster.backup.s3Secret.awsSecretAccessKey }}
+              endpointUrl: https://s3.kausal.tech
+              destinationPath: s3://paths-db-backups
+        fullnameOverride: django
+        redis:
+          fullnameOverride: redis
+          architecture: standalone  # default: replication
+        # FIXME: readiness / liveness probes don't work because we need to put some cluster IP in ALLOWED_HOSTS
+        probes:
+          liveness:
+            enabled: false
+          readiness:
+            enabled: false
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: {{ .Release.Namespace }}

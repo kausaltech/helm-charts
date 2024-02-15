@@ -41,16 +41,8 @@ https://helm.sh/docs/howto/charts_tips_and_tricks/#creating-image-pull-secrets
 {{- default (printf "%s-docker-registry" (include "paths.fullname" .)) .Values.argoCd.imagePullSecret.name }}
 {{- end }}
 
-{{- define "paths.backendDjangoEnvSecretName" -}}
-{{- default (printf "%s-django-env" (include "paths.fullname" .)) .Values.backend.django.envSecret.name }}
-{{- end }}
-
 {{- define "paths.backendDjangoArgoCdApplicationName" -}}
 {{- default (printf "%s-backend" (include "paths.fullname" .)) .Values.backend.django.argoCdApplication.name }}
-{{- end }}
-
-{{- define "paths.backendDjangoServiceName" -}}
-{{- default (printf "%s-server" (include "paths.backendDjangoArgoCdApplicationName" .)) .Values.backend.django.service }}
 {{- end }}
 
 {{- define "paths.backendRedisServiceName" -}}
@@ -69,20 +61,8 @@ https://helm.sh/docs/howto/charts_tips_and_tricks/#creating-image-pull-secrets
 {{- default (printf "%s-ui" (include "paths.fullname" .)) .Values.ui.nextjs.argoCdApplication.name }}
 {{- end }}
 
-{{- define "paths.uiNextjsServiceName" -}}
-{{- default (printf "%s-nextjs" (include "paths.uiNextjsArgoCdApplicationName" .)) .Values.ui.nextjs.service }}
-{{- end }}
-
 {{- define "paths.uiIngressTlsSecretName" -}}
 {{- default (printf "%s-ui-tls" (include "paths.fullname" .)) .Values.ui.nextjs.ingress.tlsSecretName }}
-{{- end }}
-
-{{- define "paths.dbUrlScheme" -}}
-{{- if .Values.db.postgis }}postgis{{ else }}postgresql{{ end }}
-{{- end }}
-
-{{- define "paths.dbClusterRwServiceName" -}}
-{{- printf "%s-rw" (include "paths.dbClusterName" .) }}
 {{- end }}
 
 {{- define "paths.deploymentDomain" -}}
@@ -99,4 +79,16 @@ https://helm.sh/docs/howto/charts_tips_and_tricks/#creating-image-pull-secrets
 
 {{- define "paths.uiDeploymentHost" -}}
 {{- default (printf "*.%s" (include "paths.deploymentDomain" .)) .Values.uiDeploymentHostOverride }}
+{{- end }}
+
+# FIXME: The following are duplicated from the django chart. Create a library chart for them?
+{{- define "paths.dbClusterRwServiceName" -}}
+{{/* {{- printf "%s-rw" (include "paths.dbClusterName" .) }} */}}
+{{- printf "db-cluster-rw" }}
+{{- end }}
+{{/* {{- define "paths.dbClusterName" -}} */}}
+{{/* {{- default (include "paths.fullname" .) .Values.backend.django.db.cluster.name }} */}}
+{{/* {{- end }} */}}
+{{- define "paths.dbUrlScheme" -}}
+{{- if .Values.backend.django.db.postgis }}postgis{{ else }}postgresql{{ end }}
 {{- end }}
