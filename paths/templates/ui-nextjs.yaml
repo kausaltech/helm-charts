@@ -18,6 +18,7 @@ spec:
     targetRevision: HEAD
     helm:
       values: |-
+        fullnameOverride: nextjs
         replicaCount: 3
         image:
           repository: {{ .Values.ui.nextjs.image.repository }}

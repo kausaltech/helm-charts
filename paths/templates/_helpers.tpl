@@ -45,10 +45,6 @@ https://helm.sh/docs/howto/charts_tips_and_tricks/#creating-image-pull-secrets
 {{- default (printf "%s-backend" (include "paths.fullname" .)) .Values.backend.django.argoCdApplication.name }}
 {{- end }}
 
-{{- define "paths.backendRedisServiceName" -}}
-{{- default (printf "%s-redis-master" (include "paths.fullname" .)) .Values.backend.redisService }}
-{{- end }}
-
 {{- define "paths.backendAdminRedirectMiddlewareName" -}}
 {{- default (printf "%s-backend-redirectregex-admin" (include "paths.fullname" .)) .Values.backend.adminRedirectMiddlewareName }}
 {{- end }}

@@ -50,8 +50,12 @@ backend:
             awsSecretAccessKey: ""
       scheduledBackup:
         create: false
+    dbMigrations:
+      enabled: true
+    secretKey: ""  # FIXME: auto-generate?
+    awsAccessKeyId: ""
+    awsSecretAccessKey: ""
   adminRedirectMiddlewareName: backend-redirectregex-admin # if empty, will be generated using fullname template
-  redisService: "" # if empty, will be generated using fullname template
 ui:
   nextjs:
     argoCdApplication:

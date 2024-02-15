@@ -40,7 +40,7 @@ spec:
           # MEDIA_FILES_S3_ENDPOINT: TODO
           # MEDIA_FILES_S3_BUCKET: TODO
           # MEDIA_FILES_S3_CUSTOM_DOMAIN: TODO
-          REDIS_URL: redis://{{ include "paths.backendRedisServiceName" . }}.{{ .Release.Namespace }}.svc.cluster.local
+          REDIS_URL: redis://redis-master.{{ .Release.Namespace }}.svc.cluster.local
           # PYTHONIOENCODING: utf-8  # Probably it's better to set the locale (line below)
           LC_CTYPE: C.UTF-8
           CONFIGURE_LOGGING: "1"
@@ -52,9 +52,9 @@ spec:
           # DATABASE_URL: {{ $dbUrl | b64enc }}  # If it were b64-encoded...
           DATABASE_URL: {{ $dbUrl }}
           POSTGRES_PASSWORD: {{ .Values.backend.django.db.password }}
-          SECRET_KEY: foobar123
-          # AWS_ACCESS_KEY_ID: ""  # TODO
-          # AWS_SECRET_ACCESS_KEY: ""  # TODO
+          SECRET_KEY: {{ .Values.backend.django.secretKey }}
+          AWS_ACCESS_KEY_ID: {{ .Values.backend.django.awsAccessKeyId }}
+          AWS_SECRET_ACCESS_KEY: {{ .Values.backend.django.awsSecretAccessKey }}
         ingress:
           enabled: true
           annotations:
@@ -90,12 +90,16 @@ spec:
         redis:
           fullnameOverride: redis
           architecture: standalone  # default: replication
+          auth:
+            enabled: false
         # FIXME: readiness / liveness probes don't work because we need to put some cluster IP in ALLOWED_HOSTS
         probes:
           liveness:
             enabled: false
           readiness:
             enabled: false
+        dbMigrations:
+          enabled: {{ .Values.backend.django.dbMigrations.enabled }}
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: {{ .Release.Namespace }}
