@@ -31,16 +31,16 @@ spec:
       serviceAccountName: {{ include "django.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      {{ if .Values.collect_static.enabled }}
+      {{ if .Values.collectStatic.enabled }}
       initContainers:
-        - name: {{ .Values.collect_static.name | quote }}
+        - name: {{ .Values.collectStatic.name | quote }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: IfNotPresent
           command: ["/bin/sh"]
           args:
               - -c
               - >-
-                  {{ .Values.collect_static.command }}
+                  {{ .Values.collectStatic.command }}
           {{- if or .Values.envSecrets .Values.envConfigs }}
           envFrom:
             {{- if .Values.envSecrets }}
@@ -54,7 +54,7 @@ spec:
           {{- end }}
           volumeMounts:
             - name: shared
-              mountPath: {{ .Values.data.staticfiles }}
+              mountPath: {{ .Values.data.staticFiles }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -103,9 +103,9 @@ spec:
               mountPath: /etc/caddy/Caddyfile
               subPath: Caddyfile
             - name: shared
-              mountPath: /srv/{{ .Values.data.staticfiles }}
+              mountPath: /srv/{{ .Values.data.staticFiles }}
             - name: shared
-              mountPath: /srv/{{ .Values.data.data_media }}
+              mountPath: /srv/{{ .Values.data.mediaFiles }}
         {{- end }}
       volumes:
         {{- if .Values.proxy.enabled }}

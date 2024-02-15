@@ -1,4 +1,4 @@
-{{- if .Values.db_migrations.enabled }}
+{{- if .Values.dbMigrations.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -8,14 +8,14 @@ metadata:
   annotations:
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
-    {{- if .Values.db_migrations.annotations }}
-    {{- toYaml .Values.db_migrations.annotations | nindent 4 }}
+    {{- if .Values.dbMigrations.annotations }}
+    {{- toYaml .Values.dbMigrations.annotations | nindent 4 }}
     {{- end }}
 spec:
   template:
     metadata:
       annotations:
-        {{- if .Values.db_migrations.safeToEvict }}
+        {{- if .Values.dbMigrations.safeToEvict }}
         cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
         {{- end }}
       labels:
@@ -29,15 +29,15 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "django.serviceAccountName" . }}
       containers:
-        - name: {{ .Values.db_migrations.name | default "db-migrations" | quote}}
+        - name: {{ .Values.dbMigrations.name | default "db-migrations" | quote}}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           resources:
-            {{- toYaml .Values.db_migrations.resources | nindent 12 }}
+            {{- toYaml .Values.dbMigrations.resources | nindent 12 }}
           command: ["/bin/sh"]
           args:
               - -c
               - >-
-                  {{ .Values.db_migrations.command }}
+                  {{ .Values.dbMigrations.command }}
           {{- if or .Values.envSecrets .Values.envConfigs }} 
           envFrom:
             {{- if .Values.envSecrets }}

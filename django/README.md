@@ -38,7 +38,7 @@ Static files collect is done by initContainers.
 - **staticfiles:** Add command for Django to collect static files.
 
 ```yaml
-collect_static:
+collectStatic:
   enabled: false
   name: staticfiles
   command: "python3 manage.py collectstatic --noinput"
@@ -48,8 +48,8 @@ Static files and Media directories should be given under data:
 
 ```yaml
 data:
-  staticfiles: "app/staticfiles/"
-  data_media: "app/data_media/"
+  staticFiles: "app/static/"
+  mediaFiles: "app/media_files/"
 ```
 
 Paths should be relative to the working directory of main container.
@@ -61,7 +61,7 @@ Static files are shared volume (emptyDir) between initContainer and Proxy contai
 Migrations are done with a Job. ServiceAccount, configMap and secret values are loaded before application container starts. Job is deleted after completion.
 
 ```yaml
-db_migrations:
+dbMigrations:
   enabled: true
   name: db-migration
   command: "python3 manage.py migrate --noinput"

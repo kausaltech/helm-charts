@@ -16,13 +16,13 @@ command: "uwsgi --http11-socket :8000 --socket :8001 --processes 8 --enable-thre
 
 # Django Deployment Settings
 # Init Container to collect static files
-collect_static:
+collectStatic:
   enabled: false
   name: staticfiles
   command: "python3 manage.py collectstatic --noinput"
 
 # Job to run database migrations
-db_migrations:
+dbMigrations:
   enabled: true
   name: db-migration
   command: "python3 manage.py migrate --noinput"
@@ -32,8 +32,8 @@ db_migrations:
 # Django Static files and Media data folders
 # Set to path from working directory
 data:
-  staticfiles: "app/staticfiles/"
-  data_media: "app/data_media/"
+  staticFiles: "app/static/"
+  mediaFiles: "app/media_files/"
 
 probes:
   liveness:
