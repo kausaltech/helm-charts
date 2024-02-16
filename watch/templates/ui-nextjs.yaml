@@ -28,9 +28,7 @@ spec:
           - name: {{ include "watch.imagePullSecretName" . }}
         configmap:
           data:
-            APLANS_API_BASE_URL: https://{{ include "watch.backendApiHost" . }}/v1
-            DEPLOYMENT_TYPE: "{{ .Values.deploymentType }}"
-            NEXT_PUBLIC_API_URL: https://{{ include "watch.backendApiHost" . }}/v1
+            NEXT_PUBLIC_API_URL: "https://{{ include "watch.backendApiHost" . }}/v1"
             NEXT_PUBLIC_DEPLOYMENT_TYPE: "{{ .Values.deploymentType }}"
             {{- if .Values.ui.nextjs.sentry.enabled }}
             SENTRY_DSN: "{{ .Values.ui.nextjs.sentry.dsn }}"
