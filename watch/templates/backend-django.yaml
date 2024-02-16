@@ -1,0 +1,115 @@
+{{- if .Values.backend.django.argoCdApplication.create -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ include "watch.backendDjangoArgoCdApplicationName" . }}
+  namespace: {{ .Values.argoCd.namespace }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd-image-updater.argoproj.io/app.pull-secret: pullsecret:{{ .Values.argoCd.namespace }}/{{ .Values.argoCd.imagePullSecret.name }}
+    argocd-image-updater.argoproj.io/app.update-strategy: digest # this assumes mutable tags; for immutable tags, better use semver
+    argocd-image-updater.argoproj.io/image-list: app={{ .Values.backend.django.image.repository }}:{{ .Values.backend.django.image.tag }}
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.helmChartRepoUrl }}
+    path: {{ .Values.backend.django.helmChartRepoPath }}
+    targetRevision: {{ .Values.backend.django.helmChartRepoTargetRevision }}
+    helm:
+      values: |-
+        fullnameOverride: django
+        replicaCount: 3
+        image:
+          repository: {{ .Values.backend.django.image.repository }}
+          tag: {{ .Values.backend.django.image.tag }}
+        # command: "/bin/bash -c -- while true; do sleep 30; done;"  # useful for debugging the k8s deployment
+        command: "{{ .Values.backend.django.command }}"
+        imagePullSecrets:
+          - name: {{ include "watch.imagePullSecretName" . }}
+        envConfigs:
+          # TODO
+          ALLOWED_HOSTS: "{{ include "watch.backendApiHost" . }},{{ include "watch.backendAdminHost" . }}"
+          ALLOWED_SENDER_EMAILS: "{{ .Values.backend.django.allowedSenderEmails }}"
+          AZURE_AD_CLIENT_ID: "{{ .Values.backend.django.azureAdClientId }}"
+          CONFIGURE_LOGGING: "1"
+          DEBUG: "{{ if .Values.debug }}1{{ else }}0{{ end }}"
+          DEPLOYMENT_TYPE: "{{ .Values.deploymentType }}"
+          EXTRA_INSTALLED_APPS: kausal_watch_extensions
+          GOOGLE_CLIENT_ID: "{{ .Values.backend.django.googleClientId }}"
+          HOST_PORT: 127.0.0.1:8001
+          HOSTNAME_PLAN_DOMAINS: "{{ include "watch.deploymentDomain" . }}"
+          #MAILGUN_API_KEY: TODO
+          #MAILGUN_REGION: TODO
+          #MAILGUN_SENDER_DOMAIN: TODO
+          MEDIA_ROOT: /srv/media
+          #MEDIA_URL: TODO?
+          #OIDC_CLIENT_ID: TODO
+          #OIDC_CLIENT_SECRET: TODO
+          #OIDC_ISSUER_URL: TODO
+          OKTA_API_URL: "{{ .Values.backend.django.oktaApiUrl }}"
+          OKTA_CLIENT_ID: "{{ .Values.backend.django.oktaClientId }}"
+          {{- if .Values.backend.django.sentry.enabled }}
+          SENTRY_DSN: "{{ .Values.backend.django.sentry.dsn }}"
+          {{- end }}
+          UWSGI_SOCKET_PORT: 127.0.0.1:8002
+        envSecrets:
+          AZURE_AD_CLIENT_SECRET: "{{ .Values.backend.django.azureAdClientSecret }}"
+          DATABASE_URL: "postgis://{{ .Values.backend.django.db.user }}:{{ .Values.backend.django.db.password }}@db-cluster-rw/{{ .Values.backend.django.db.database }}"
+          ELASTICSEARCH_URL: "http://{{ .Values.backend.django.elasticsearch.user }}:{{ .Values.backend.django.elasticsearch.password }}@{{ .Values.backend.django.elasticsearch.host }}:{{ .Values.backend.django.elasticsearch.port }}"
+          GOOGLE_CLIENT_SECRET: "{{ .Values.backend.django.googleClientSecret }}"
+          OKTA_CLIENT_SECRET: "{{ .Values.backend.django.oktaClientSecret }}"
+          SECRET_KEY: "{{ include "watch.backendDjangoSecretKey" . }}"
+        ingress:
+          enabled: true
+          annotations:
+            cert-manager.io/cluster-issuer: lets-encrypt
+            external-dns.alpha.kubernetes.io/target: {{ .Values.backend.django.ingress.externalDnsTarget }}
+            traefik.ingress.kubernetes.io/router.middlewares: {{ print .Release.Namespace "-" (include "watch.backendAdminRedirectMiddlewareName" .) "@kubernetescrd" }}
+          hosts:
+            - host: "{{ include "watch.backendAdminHost" . }}"
+              paths:
+                - path: /
+                  pathType: Prefix
+            - host: "{{ include "watch.backendApiHost" . }}"
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls:
+            - hosts:
+                - {{ include "watch.backendAdminHost" . }}
+                - {{ include "watch.backendApiHost" . }}
+              secretName: {{ include "watch.backendIngressTlsSecretName" . }}
+        db:
+          database: "{{ .Values.backend.django.db.database }}"
+          user: "{{ .Values.backend.django.db.user }}"
+          password: "{{ .Values.backend.django.db.password }}"
+          cluster:
+            backup:
+              s3Secret:
+                awsAccessKeyId: "{{ .Values.backend.django.db.cluster.backup.s3Secret.awsAccessKeyId }}"
+                awsSecretAccessKey: "{{ .Values.backend.django.db.cluster.backup.s3Secret.awsSecretAccessKey }}"
+              endpointUrl: "{{ .Values.backend.django.db.cluster.backup.endpointUrl }}"
+              destinationPath: "{{ .Values.backend.django.db.cluster.backup.destinationPath }}"
+        redis:
+          fullnameOverride: redis
+          architecture: standalone  # default: replication
+          auth:
+            enabled: false
+        # FIXME: readiness / liveness probes don't work because we need to put some cluster IP in ALLOWED_HOSTS
+        probes:
+          liveness:
+            enabled: false
+          readiness:
+            enabled: false
+        dbMigrations:
+          enabled: {{ .Values.backend.django.dbMigrations.enabled }}
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: {{ .Release.Namespace }}
+  {{- if .Values.backend.django.argoCdApplication.enableAutoSync }}
+  syncPolicy:
+    automated:
+      prune: true
+  {{- end }}
+{{- end -}}
