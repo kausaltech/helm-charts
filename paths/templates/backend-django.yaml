@@ -24,15 +24,15 @@ spec:
           repository: {{ .Values.backend.django.image.repository }}
           tag: {{ .Values.backend.django.image.tag }}
         # command: "/bin/bash -c -- while true; do sleep 30; done;"  # useful for debugging the k8s deployment
-        command: {{ .Values.backend.django.command }}
+        command: "{{ .Values.backend.django.command }}"
         imagePullSecrets:
           - name: {{ include "paths.imagePullSecretName" . }}
         envConfigs:
           DJANGO_SETTINGS_MODULE: paths.settings
           DEBUG: "{{ if .Values.debug }}1{{ else }}0{{ end }}"
-          DEPLOYMENT_TYPE: {{ .Values.deploymentType }}
-          ALLOWED_HOSTS: {{ include "paths.backendApiHost" . }},{{ include "paths.backendAdminHost" . }}
-          HOSTNAME_INSTANCE_DOMAINS: {{ include "paths.deploymentDomain" . }}
+          DEPLOYMENT_TYPE: "{{ .Values.deploymentType }}"
+          ALLOWED_HOSTS: "{{ include "paths.backendApiHost" . }},{{ include "paths.backendAdminHost" . }}"
+          HOSTNAME_INSTANCE_DOMAINS: "{{ include "paths.deploymentDomain" . }}"
           # TODO
           # MEDIA_FILES_S3_ENDPOINT: TODO
           # MEDIA_FILES_S3_BUCKET: TODO
@@ -42,14 +42,13 @@ spec:
           LC_CTYPE: C.UTF-8
           CONFIGURE_LOGGING: "1"
           {{- if .Values.backend.django.sentry.enabled }}
-          SENTRY_DSN: {{ .Values.backend.django.sentry.dsn }}
+          SENTRY_DSN: "{{ .Values.backend.django.sentry.dsn }}"
           {{- end }}
         envSecrets:
           DATABASE_URL: "postgresql://{{ .Values.backend.django.db.user }}:{{ .Values.backend.django.db.password }}@db-cluster-rw/{{ .Values.backend.django.db.database }}"
-          POSTGRES_PASSWORD: {{ .Values.backend.django.db.password }}
-          SECRET_KEY: {{ include "paths.backendDjangoSecretKey" . }}
-          AWS_ACCESS_KEY_ID: {{ .Values.backend.django.awsAccessKeyId }}
-          AWS_SECRET_ACCESS_KEY: {{ .Values.backend.django.awsSecretAccessKey }}
+          SECRET_KEY: "{{ include "paths.backendDjangoSecretKey" . }}"
+          AWS_ACCESS_KEY_ID: "{{ .Values.backend.django.awsAccessKeyId }}"
+          AWS_SECRET_ACCESS_KEY: "{{ .Values.backend.django.awsSecretAccessKey }}"
         ingress:
           enabled: true
           annotations:
@@ -71,16 +70,16 @@ spec:
                 - {{ include "paths.backendApiHost" . }}
               secretName: {{ include "paths.backendIngressTlsSecretName" . }}
         db:
-          database: {{ .Values.backend.django.db.database }}
-          user: {{ .Values.backend.django.db.user }}
-          password: {{ .Values.backend.django.db.password }}
+          database: "{{ .Values.backend.django.db.database }}"
+          user: "{{ .Values.backend.django.db.user }}"
+          password: "{{ .Values.backend.django.db.password }}"
           cluster:
             backup:
               s3Secret:
-                awsAccessKeyId: {{ .Values.backend.django.db.cluster.backup.s3Secret.awsAccessKeyId }}
-                awsSecretAccessKey: {{ .Values.backend.django.db.cluster.backup.s3Secret.awsSecretAccessKey }}
-              endpointUrl: {{ .Values.backend.django.db.cluster.backup.endpointUrl }}
-              destinationPath: {{ .Values.backend.django.db.cluster.backup.destinationPath }}
+                awsAccessKeyId: "{{ .Values.backend.django.db.cluster.backup.s3Secret.awsAccessKeyId }}"
+                awsSecretAccessKey: "{{ .Values.backend.django.db.cluster.backup.s3Secret.awsSecretAccessKey }}"
+              endpointUrl: "{{ .Values.backend.django.db.cluster.backup.endpointUrl }}"
+              destinationPath: "{{ .Values.backend.django.db.cluster.backup.destinationPath }}"
         redis:
           fullnameOverride: redis
           architecture: standalone  # default: replication
