@@ -81,6 +81,7 @@ spec:
                 - {{ include "watch.backendApiHost" . }}
               secretName: {{ include "watch.backendIngressTlsSecretName" . }}
         db:
+          postgis: true
           database: "{{ .Values.backend.django.db.database }}"
           user: "{{ .Values.backend.django.db.user }}"
           password: "{{ .Values.backend.django.db.password }}"
