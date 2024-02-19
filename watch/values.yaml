@@ -9,6 +9,7 @@ argoCd:
 debug: false
 deploymentType: testing  # passed to Django and NextJs; typically production, staging, testing or development
 environment: test  # not passed to the applications; used for URLs; typically prod, staging, test or dev
+externalDnsTarget: "" # target of CNAME created by back-end and front-end ingress; e.g., de-dev-lb.de.kausal.dev
 # baseDomain is used for constructing the deployment domain. By default, we set up:
 # - domain for the backend admin interface (override with backendAdminHostOverride)
 # - domain for the backend API (override with backendApiHostOverride)
@@ -37,7 +38,6 @@ backend:
       tag: testing-latest
     command: "uwsgi --http-socket :8000 --socket :8001 --processes 4 --enable-threads --ignore-sigpipe --ignore-write-errors --disable-write-exception --buffer-size=32768 --static-map /static=/srv/static --static-map /media=/srv/media --module aplans.wsgi"
     ingress:
-      externalDnsTarget: de-dev-lb.de.kausal.dev
       tlsSecretName: "" # if empty, will be generated using fullname template
     sentry:
       enabled: false
@@ -94,5 +94,4 @@ ui:
       url: https://sentry.kausal.tech
       authToken: ""
     ingress:
-      externalDnsTarget: de-dev-lb.de.kausal.dev
       tlsSecretName: "" # if empty, will be generated using fullname template

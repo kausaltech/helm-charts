@@ -41,7 +41,9 @@ spec:
           enabled: true
           annotations:
             cert-manager.io/cluster-issuer: lets-encrypt
-            external-dns.alpha.kubernetes.io/target: {{ .Values.ui.nextjs.ingress.externalDnsTarget }}
+            {{- with .Values.externalDnsTarget }}
+            external-dns.alpha.kubernetes.io/target: {{ . }}
+            {{- end }}
             # admin.watch.kausal.dev, used by backend-ingress, must have higher priority than *.watch.test.kausal.dev.
             # So set the priority of this rule as low as possible. (The value 0 would make Traefik use string length.)
             traefik.ingress.kubernetes.io/router.priority: "1"
