@@ -76,4 +76,5 @@ ui:
     sentry:
       enabled: false
       dsn: https://cf7003ffbd0a4b63b1e24243f796e227@sentry.kausal.tech/7
+    ingress:
       tlsSecretName: "" # if empty, will be generated using fullname template
