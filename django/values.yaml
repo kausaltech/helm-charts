@@ -210,6 +210,8 @@ db:
         awsSecretAccessKey: ""
       endpointUrl: ""
       destinationPath: ""
+    bootstrapRecovery:
+      enabled: false
   scheduledBackup:
     create: false
     name: db-backup # if empty, will be generated using fullname template

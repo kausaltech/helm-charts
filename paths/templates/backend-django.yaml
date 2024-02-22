@@ -77,11 +77,15 @@ spec:
           password: "{{ .Values.backend.django.db.password }}"
           cluster:
             backup:
+              enabled: "{{ .Values.backend.django.db.cluster.backup.enabled }}"
               s3Secret:
+                create: "{{ .Values.backend.django.db.cluster.backup.s3Secret.create }}"
                 awsAccessKeyId: "{{ .Values.backend.django.db.cluster.backup.s3Secret.awsAccessKeyId }}"
                 awsSecretAccessKey: "{{ .Values.backend.django.db.cluster.backup.s3Secret.awsSecretAccessKey }}"
               endpointUrl: "{{ .Values.backend.django.db.cluster.backup.endpointUrl }}"
               destinationPath: "{{ .Values.backend.django.db.cluster.backup.destinationPath }}"
+            bootstrapRecovery:
+              enabled: "{{ .Values.backend.django.db.cluster.bootstrapRecovery.enabled }}"
         redis:
           fullnameOverride: redis
           architecture: standalone  # default: replication

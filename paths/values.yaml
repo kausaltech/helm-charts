@@ -48,11 +48,15 @@ backend:
       password: ""
       cluster:
         backup:
+          enabled: false
           s3Secret:
+            create: false
             awsAccessKeyId: ""
             awsSecretAccessKey: ""
           endpointUrl: https://s3.kausal.tech
           destinationPath: s3://paths-db-backups
+        bootstrapRecovery:
+          enabled: false
       scheduledBackup:
         create: false
     dbMigrations:

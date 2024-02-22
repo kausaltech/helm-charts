@@ -43,4 +43,31 @@ spec:
           name: {{ include "django.dbBackupS3SecretName" . }}
           key: AWS_SECRET_ACCESS_KEY
   {{- end }}
+  {{- if .Values.db.cluster.bootstrapRecovery.enabled }}
+  bootstrap:
+    recovery:
+      source: cluster-bootstrap-recovery
+  externalClusters:
+    - name: cluster-bootstrap-recovery
+      # Use same storage location as for backups for now. Note that enabling backups and bootstrapRecovery
+      # at the same time will probably result in an error. From the docs:
+      # You should not re-use the exact same barmanObjectStore configuration for different clusters. There could be
+      # cases where the existing information in the storage buckets could be overwritten by the new cluster.
+      # The operator includes a safety check to ensure a cluster will not overwrite a storage bucket that contained
+      # information. A cluster that would overwrite existing storage will remain in state Setting up primary with
+      # Pods in an Error state. The pod logs will show: ERROR: WAL archive check failed for server recoveredCluster:
+      # Expected empty archive
+      barmanObjectStore:
+        destinationPath: {{ .Values.db.cluster.backup.destinationPath }}
+        endpointURL: {{ .Values.db.cluster.backup.endpointUrl }}
+        s3Credentials:
+          accessKeyId:
+            name: {{ include "django.dbBackupS3SecretName" . }}
+            key: AWS_ACCESS_KEY_ID
+          secretAccessKey:
+            name: {{ include "django.dbBackupS3SecretName" . }}
+            key: AWS_SECRET_ACCESS_KEY
+      wal:
+        maxParallel: 8
+  {{- end }}
 {{- end -}}
