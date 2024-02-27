@@ -60,6 +60,7 @@ spec:
       barmanObjectStore:
         destinationPath: {{ .Values.db.cluster.backup.destinationPath }}
         endpointURL: {{ .Values.db.cluster.backup.endpointUrl }}
+        serverName: {{ include "django.dbClusterName" . }}
         s3Credentials:
           accessKeyId:
             name: {{ include "django.dbBackupS3SecretName" . }}
