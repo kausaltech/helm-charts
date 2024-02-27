@@ -211,7 +211,7 @@ db:
       endpointUrl: ""
       destinationPath: ""
     bootstrapRecovery:
-      enabled: false
+      enabled: false  # if true, will use S3 storage from db.cluster.backup as source
   scheduledBackup:
     create: false
     name: db-backup # if empty, will be generated using fullname template
