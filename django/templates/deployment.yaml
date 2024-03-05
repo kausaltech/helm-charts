@@ -44,17 +44,7 @@ spec:
               - -c
               - >-
                   {{ .Values.collectStatic.command }}
-          {{- if or .Values.envSecrets .Values.envConfigs }}
-          envFrom:
-            {{- if .Values.envSecrets }}
-            - secretRef:
-                name: env-secrets
-            {{- end }}
-            {{- if .Values.envConfigs }}
-            - configMapRef:
-                name: env-configmap
-            {{- end }}
-          {{- end }}
+          {{- include "django.envVariables" . | nindent 10 }}
           volumeMounts:
             - name: shared
               mountPath: {{ .Values.data.staticFiles }}
@@ -83,12 +73,22 @@ spec:
             httpGet:
               path: {{ .liveness.path }}
               port: {{ $.Values.image.containerPort }}
+              {{- if .liveness.host }}
+              httpHeaders:
+                - name: Host
+                  value: {{ .liveness.host }}
+              {{- end -}}
           {{- end }}
           {{- if .readiness.enabled }}
           readinessProbe:
             httpGet:
               path: {{ .readiness.path }}
               port: {{ $.Values.image.containerPort }}
+              {{- if .readiness.host }}
+              httpHeaders:
+                - name: Host
+                  value: {{ .readiness.host }}
+              {{- end -}}
           {{- end }}
         {{- end }}
           resources:

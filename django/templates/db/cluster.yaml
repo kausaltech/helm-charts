@@ -4,18 +4,20 @@ kind: Cluster
 metadata:
   name: {{ include "django.dbClusterName" . }}
 spec:
-  instances: 3
+  instances: {{ .Values.db.cluster.instances | default 3 }}
   {{- if .Values.db.postgis }}
-  imageName: ghcr.io/cloudnative-pg/postgis:13
+  imageName: ghcr.io/cloudnative-pg/postgis:{{ .Values.db.cluster.version }}
   {{- else }}
-  imageName: ghcr.io/cloudnative-pg/postgresql:13
+  imageName: ghcr.io/cloudnative-pg/postgresql:{{ .Values.db.cluster.version }}
   {{- end }}
   bootstrap:
     initdb:
       database: {{ .Values.db.database }}
       owner: {{ .Values.db.user }}
+      {{ if not .Values.db.cluster.create -}}
       secret:
         name: {{ include "django.dbSecretName" . }}
+      {{- end }}
       {{- if .Values.db.postgis }}
       postInitTemplateSQL:
         - CREATE EXTENSION postgis;
@@ -27,7 +29,7 @@ spec:
   #               the switchover of the primary
   primaryUpdateStrategy: unsupervised
   storage:
-    size: 1Gi
+    size: {{ .Values.db.cluster.size }}
   {{- if .Values.db.cluster.backup.enabled }}
   backup:
     target: prefer-standby

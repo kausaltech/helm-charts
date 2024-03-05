@@ -38,15 +38,5 @@ spec:
               - -c
               - >-
                   {{ .Values.dbMigrations.command }}
-          {{- if or .Values.envSecrets .Values.envConfigs }} 
-          envFrom:
-            {{- if .Values.envSecrets }}
-            - secretRef:
-                name: env-secrets
-            {{- end }}
-            {{- if .Values.envConfigs }}
-            - configMapRef:
-                name: env-configmap
-            {{- end }}
-          {{- end }}
+          {{- include "django.envVariables" . | nindent 10 }}
 {{- end }}

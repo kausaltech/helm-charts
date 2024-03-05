@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ include "paths.backendDjangoArgoCdApplicationName" . }}
+  namespace: {{ .Values.argoCd.namespace }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd-image-updater.argoproj.io/app.pull-secret: pullsecret:{{ .Values.argoCd.namespace }}/{{ .Values.argoCd.imagePullSecret.name }}
+    argocd-image-updater.argoproj.io/app.update-strategy: digest # this assumes mutable tags; for immutable tags, better use semver
+    argocd-image-updater.argoproj.io/image-list: app={{ .Values.django.image.repository }}:{{ .Values.django.image.tag }}
+spec:
+  project: {{ .Values.argoCd.project | default "default" }}
+  source:
+    repoURL: {{ .Values.helmChartRepoUrl }}
+    path: {{ .Values.django.helmChartRepoPath }}
+    targetRevision: {{ .Values.django.helmChartRepoTargetRevision }}
+    helm:
+      valuesObject:
+        {{- include "paths.djangoChartValues" . | nindent 8 }}
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: {{ .Release.Namespace }}
+  {{- if .Values.django.argoCdApplication.enableAutoSync }}
+  syncPolicy:
+    automated:
+      prune: true
+  {{- end }}
