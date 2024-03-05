@@ -1,0 +1,8 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "paths.backendAdminRedirectMiddlewareName" . }}
+spec:
+  redirectRegex:
+    regex: ^https://{{ (include "paths.backendAdminHost" .) | replace "." "\\." }}/$
+    replacement: https://{{ include "paths.backendAdminHost" . }}/admin/

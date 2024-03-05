@@ -39,9 +39,13 @@ probes:
   liveness:
     enabled: true
     path: /healthy
+    # Use explicit HTTP Host header
+    host: ""
   readiness:
     enabled: true
     path: /ready
+    # Use explicit HTTP Host header
+    host: ""
 
 imagePullSecrets: []
 nameOverride: ""
@@ -65,6 +69,8 @@ envConfigs: {}
 
 # Env Secret Values (as plain text, not base64-encoded)
 envSecrets: {}
+
+additionalEnvFrom: []
 
 # Django Ingress Values
 ingress:
@@ -143,6 +149,10 @@ redis:
     enabled: true
     runAsUser: 1001
 
+  networkPolicy:
+    allowExternal: false
+    allowExternalEgress: false
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
@@ -196,16 +206,18 @@ db:
   password: ""
   secret:
     create: true
-    name: db-credentials # if empty, will be generated using fullname template
+    name: "" # if empty, will be generated using fullname template
   postgis: false
   cluster:
     create: true
-    name: db-cluster # if empty, will be generated using fullname template
+    version: '16'
+    size: '1Gi'
+    name: "" # if empty, will be generated using fullname template
     backup:
       enabled: false
       s3Secret:
         create: false
-        name: db-backup-s3 # if empty, will be generated using fullname template
+        name: "" # if empty, will be generated using fullname template
         awsAccessKeyId: ""
         awsSecretAccessKey: ""
       endpointUrl: ""
@@ -214,4 +226,4 @@ db:
       enabled: false  # if true, will use S3 storage from db.cluster.backup as source
   scheduledBackup:
     create: false
-    name: db-backup # if empty, will be generated using fullname template
+    name: "" # if empty, will be generated using fullname template

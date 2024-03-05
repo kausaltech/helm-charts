@@ -61,32 +61,53 @@ Create the name of the service account to use
 {{- end }}
 {{- end }}
 
-{{- define "django.envVariables" -}}
-{{- if or .Values.envSecrets .Values.envConfigs }} 
-envFrom:
-{{- if .Values.envSecrets }}
-- secretRef:
-    name: env-secrets
-{{- end }}
-{{- if .Values.envConfigs }}
-- configMapRef:
-    name: env-configmap
-{{- end }}
-{{- end }}
-{{- end }}
-
 {{- define "django.dbBackupS3SecretName" -}}
 {{- default (printf "%s-db-backup-s3" (include "django.fullname" .)) .Values.db.cluster.backup.s3Secret.name }}
 {{- end }}
 
 {{- define "django.dbClusterName" -}}
-{{- default (include "django.fullname" .) .Values.db.cluster.name }}
+{{- default (printf "%s-db" (include "django.fullname" .)) .Values.db.cluster.name }}
 {{- end }}
 
 {{- define "django.dbSecretName" -}}
+{{- if .Values.db.cluster.create }}
 {{- default (printf "%s-db-credentials" (include "django.fullname" .)) .Values.db.secret.name }}
+{{- else }}
+{{- end }}
 {{- end }}
 
 {{- define "django.dbScheduledBackupName" -}}
 {{- default (printf "%s-backup" (include "django.fullname" .)) .Values.db.scheduledBackup.name }}
+{{- end }}
+
+{{- define "django.envVariables" -}}
+env:
+{{- if .Values.db.cluster.create }}
+  - name: DATABASE_URL
+    valueFrom:
+      secretKeyRef:
+        name: {{ include "django.dbClusterName" . }}-app
+        key: uri
+{{- end }}
+{{- if .Values.additionalEnv }}
+  {{- toYaml .Values.additionalEnv | nindent 2 }}
+{{- end }}
+
+{{- if or .Values.envSecrets .Values.envConfigs }} 
+envFrom:
+  {{- if .Values.envSecrets }}
+  - secretRef:
+      name: {{ .Release.Name }}-env-secrets
+  {{- end }}
+
+  {{- if .Values.envConfigs }}
+  - configMapRef:
+      name: {{ .Release.Name }}-env-configmap
+  {{- end }}
+
+  {{- if .Values.additionalEnvFrom }}
+    {{- toYaml .Values.additionalEnvFrom | nindent 2 }}
+  {{- end }}
+{{- end }}
+
 {{- end }}
