@@ -32,7 +32,7 @@ spec:
           DEBUG: "{{ if .Values.debug }}1{{ else }}0{{ end }}"
           DEPLOYMENT_TYPE: {{ .Values.deploymentType }}
           ALLOWED_HOSTS: {{ include "paths.backendApiHost" . }},{{ include "paths.backendAdminHost" . }}
-          HOSTNAME_INSTANCE_DOMAINS: {{ include "paths.deploymentDomain" . }}
+          HOSTNAME_INSTANCE_DOMAINS: localhost,{{ include "paths.deploymentDomain" . }}
           # TODO
           # MEDIA_FILES_S3_ENDPOINT: TODO
           # MEDIA_FILES_S3_BUCKET: TODO
