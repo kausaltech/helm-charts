@@ -58,6 +58,10 @@ ingress:
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
+  externalHosts: []
+  #  - host: chart.example.com
+  #    path: /abcd
+  #    tls: true
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
