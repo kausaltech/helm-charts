@@ -1,0 +1,28 @@
+apiVersion: v1
+entries:
+  django:
+  - apiVersion: v2
+    created: "2024-04-30T13:49:21.124567933Z"
+    dependencies:
+    - condition: redis.enabled
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: ^19
+    description: Deploy Django in Kubernetes
+    digest: 40f2ef7a2bbfa432cceae79321636d17d3ef49f0a17f9ea760f72eb85797b979
+    name: django
+    type: application
+    urls:
+    - https://github.com/kausaldev/helm-charts/releases/download/django-0.3.2/django-0.3.2.tgz
+    version: 0.3.2
+  nextjs:
+  - apiVersion: v2
+    created: "2024-04-30T13:49:21.230984217Z"
+    description: Deploy a NextJS app in Kubernetes
+    digest: 0b6b651cfcdd9471c142a2716c512b3aea56e53e7fbe75cf2caae566225af414
+    name: nextjs
+    type: application
+    urls:
+    - https://github.com/kausaldev/helm-charts/releases/download/nextjs-0.2.1/nextjs-0.2.1.tgz
+    version: 0.2.1
+generated: "2024-04-30T13:49:21.231011328Z"
