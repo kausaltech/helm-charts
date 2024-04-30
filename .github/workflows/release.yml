@@ -48,7 +48,7 @@ jobs:
         env:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
-          echo $DOCKER_PASSWORD | helm registry login ${{ vars.DOCKER_REGISTRY }} -u ${{ secrets.DOCKER_USERNAME }}
+          echo $DOCKER_PASSWORD | helm registry login ${{ vars.DOCKER_REGISTRY }} -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
       - name: Upload charts
         if: steps.chart_releaser.outputs.changed_charts
