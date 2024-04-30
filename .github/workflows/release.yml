@@ -28,15 +28,20 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
+      - name: Add dependency repositories
+        run: |
+          for dir in $(ls -d charts/*/); do
+            helm dependency list $dir 2> /dev/null | tail +2 | head -n -1 | awk '{ print "helm repo add " $1 " " $3 }' | while read cmd; do $cmd; done
+          done
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@main
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:
-          charts_dir: .
+          charts_dir: charts/
           skip_upload: true
 
-      - name: ls
+      - name: ls 
         run: |
-          ls -la
-          ls -la ./charts
+          ls -laR
