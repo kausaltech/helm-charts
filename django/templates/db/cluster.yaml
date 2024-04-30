@@ -10,6 +10,10 @@ spec:
   {{- else }}
   imageName: ghcr.io/cloudnative-pg/postgresql:{{ .Values.db.cluster.version }}
   {{- end }}
+  {{- with .Values.db.cluster.affinity }}
+  affinity:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   bootstrap:
     initdb:
       database: {{ .Values.db.database }}
@@ -30,6 +34,9 @@ spec:
   primaryUpdateStrategy: unsupervised
   storage:
     size: {{ .Values.db.cluster.size }}
+    {{- if .Values.db.cluster.storageClass }}
+    storageClass: {{ .Values.db.cluster.storageClass }}
+    {{- end -}}
   {{- if .Values.db.cluster.backup.enabled }}
   backup:
     target: prefer-standby

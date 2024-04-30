@@ -210,8 +210,12 @@ db:
   postgis: false
   cluster:
     create: true
+    nodeSelector: {}
+    affinity: {}
     version: '16'
+    instances: 3
     size: '1Gi'
+    storageClass: ''
     name: "" # if empty, will be generated using fullname template
     backup:
       enabled: false
@@ -224,6 +228,6 @@ db:
       destinationPath: ""
     bootstrapRecovery:
       enabled: false  # if true, will use S3 storage from db.cluster.backup as source
-  scheduledBackup:
-    create: false
-    name: "" # if empty, will be generated using fullname template
+    scheduledBackup:
+      create: false
+      name: "" # if empty, will be generated using fullname template

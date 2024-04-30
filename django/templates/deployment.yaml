@@ -34,21 +34,29 @@ spec:
       serviceAccountName: {{ include "django.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      {{ if .Values.collectStatic.enabled }}
       initContainers:
-        - name: {{ .Values.collectStatic.name | quote }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: IfNotPresent
-          command: ["/bin/sh"]
+        {{- if .Values.db.cluster.create }}
+        - name: wait-for-db
+          image: bitnami/kubectl
           args:
-              - -c
-              - >-
-                  {{ .Values.collectStatic.command }}
-          {{- include "django.envVariables" . | nindent 10 }}
-          volumeMounts:
-            - name: shared
-              mountPath: {{ .Values.data.staticFiles }}
-      {{- end }}
+            - wait
+            - clusters.postgresql.cnpg.io/{{ include "django.dbClusterName" . }}
+            - --for=condition=ready
+            - --timeout=180s
+        {{- end }}
+        {{- if .Values.dbMigrations.enabled }}
+        - name: wait-for-migration
+          image: bitnami/kubectl
+          command:
+            - 'sh'
+            - '-c'
+            - |
+              JOB=job/{{ include "django.fullname" . }}-db-migrations ;
+              if kubectl wait $JOB --for=delete --timeout=1s ; then
+                exit 0 ;
+              fi ;
+              kubectl wait $JOB --for=condition=complete --timeout=180s
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -67,7 +75,7 @@ spec:
             - name: django
               containerPort: {{ .Values.image.containerPort }}
               protocol: TCP
-        {{- with .Values.probes }}
+          {{- with .Values.probes }}
           {{- if .liveness.enabled }}
           livenessProbe:
             httpGet:
@@ -77,7 +85,10 @@ spec:
               httpHeaders:
                 - name: Host
                   value: {{ .liveness.host }}
-              {{- end -}}
+              {{- end }}
+            initialDelaySeconds: {{ .liveness.initialDelaySeconds | default 30 }}
+            periodSeconds: {{ .liveness.initialDelaySeconds | default 10 }}
+            failureThreshold: {{ .liveness.failureThreshold | default 30 }}
           {{- end }}
           {{- if .readiness.enabled }}
           readinessProbe:
@@ -88,9 +99,12 @@ spec:
               httpHeaders:
                 - name: Host
                   value: {{ .readiness.host }}
-              {{- end -}}
+              {{- end }}
+            initialDelaySeconds: {{ .readiness.initialDelaySeconds | default 5 }}
+            periodSeconds: {{ .readiness.initialDelaySeconds | default 10 }}
+            failureThreshold: {{ .readiness.failureThreshold | default 30 }}
           {{- end }}
-        {{- end }}
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
 

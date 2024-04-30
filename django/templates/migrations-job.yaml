@@ -28,6 +28,16 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "django.serviceAccountName" . }}
+      initContainers:
+      {{- if .Values.db.cluster.create }}
+        - name: wait-for-db
+          image: bitnami/kubectl
+          args:
+            - wait
+            - clusters.postgresql.cnpg.io/{{ include "django.dbClusterName" . }}
+            - --for=condition=ready
+            - --timeout=180s
+      {{- end }}
       containers:
         - name: {{ .Values.dbMigrations.name | default "db-migrations" | quote}}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

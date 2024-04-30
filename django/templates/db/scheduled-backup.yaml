@@ -1,4 +1,4 @@
-{{- if .Values.db.scheduledBackup.create -}}
+{{- if .Values.db.cluster.scheduledBackup.create -}}
 apiVersion: postgresql.cnpg.io/v1
 kind: ScheduledBackup
 metadata:

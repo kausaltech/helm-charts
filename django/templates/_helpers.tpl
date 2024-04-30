@@ -77,7 +77,7 @@ Create the name of the service account to use
 {{- end }}
 
 {{- define "django.dbScheduledBackupName" -}}
-{{- default (printf "%s-backup" (include "django.fullname" .)) .Values.db.scheduledBackup.name }}
+{{- default (printf "%s-backup" (include "django.fullname" .)) .Values.db.cluster.scheduledBackup.name }}
 {{- end }}
 
 {{- define "django.envVariables" -}}
