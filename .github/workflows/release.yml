@@ -36,12 +36,25 @@ jobs:
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@main
+        id: chart_releaser
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:
           charts_dir: charts/
           skip_upload: true
 
-      - name: ls 
+      - name: Log in to Harbor
+        if: steps.chart_releaser.outputs.changed_charts
+        env:
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
-          ls -laR
+          echo $DOCKER_PASSWORD | helm registry login ${{ vars.DOCKER_REGISTRY }} -u ${{ secrets.DOCKER_USERNAME }}
+
+      - name: Upload charts
+        if: steps.chart_releaser.outputs.changed_charts
+        env:
+          CHARTS: ${{ steps.chart_releaser.outputs.changed_charts }}
+        run: |
+          for chart in ${CHART//,/ } ; do
+            helm push "$chart" oci://${{ vars.DOCKER_REGISTRY }}/$(echo ${{ vars.DOCKER_IMAGE_REPO }} | cut -d / -f 1) ;
+          done
