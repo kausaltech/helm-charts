@@ -50,9 +50,9 @@ jobs:
 
       - name: Upload charts
         if: steps.chart_releaser.outputs.changed_charts
-        env:
-          CHARTS: ${{ steps.chart_releaser.outputs.changed_charts }}
         run: |
-          for chart in ${CHART//,/ } ; do
-            helm push "$chart" oci://${{ vars.DOCKER_REGISTRY }}/$(echo ${{ vars.DOCKER_IMAGE_REPO }} | cut -d / -f 1) ;
+          for chart in .cr-release-packages/*.tgz ; do
+            oci_url=oci://${{ vars.DOCKER_REGISTRY }}/$(echo ${{ vars.DOCKER_IMAGE_REPO }} | cut -d / -f 1) ;
+            echo Pushing "$chart" to "$oci_url" ;
+            helm push "$chart" "$oci_url" ;
           done
