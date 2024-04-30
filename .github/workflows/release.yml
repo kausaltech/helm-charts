@@ -41,7 +41,8 @@ jobs:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:
           charts_dir: charts/
-          skip_upload: true
+          pages_branch: gh-pages
+          # skip_upload: true
 
       - name: Log in to Harbor
         if: steps.chart_releaser.outputs.changed_charts
