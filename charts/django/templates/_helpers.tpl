@@ -130,13 +130,11 @@ envFrom:
 - name: secret-{{ .name }}
   secret:
     secretName: {{ .name }}
-    defaultMode: 256
 {{- end }}{{- end }}{{- end }}
 {{- if $.Values.db.cluster.create }}
 - name: db-credentials
   secret:
     secretName: {{ include "django.dbClusterName" . }}-app
-    defaultMode: 256
 {{- end }}
 {{- end }}
 

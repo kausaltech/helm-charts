@@ -32,17 +32,22 @@ spec:
       {{- if .Values.db.cluster.create }}
         - name: wait-for-db
           image: bitnami/kubectl
+          imagePullPolicy: IfNotPresent
           args:
             - wait
             - clusters.postgresql.cnpg.io/{{ include "django.dbClusterName" . }}
             - --for=condition=ready
             - --timeout=180s
       {{- end }}
+      volumes:
+        {{- include "django.secretVolumes" . | nindent 8 }}
       containers:
         - name: {{ .Values.dbMigrations.name | default "db-migrations" | quote}}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           resources:
             {{- toYaml .Values.dbMigrations.resources | nindent 12 }}
+          volumeMounts:
+            {{- include "django.secretVolumeMounts" . | nindent 12 }}
           command: ["/bin/sh"]
           args:
               - -c
