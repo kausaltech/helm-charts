@@ -28,3 +28,8 @@ dependencies:
     condition: redis.enabled
     version: "^19"
     repository: "https://charts.bitnami.com/bitnami"
+
+  - name: "elasticsearch"
+    condition: elasticsearch.enabled
+    version: "^21"
+    repository: "oci://registry-1.docker.io/bitnamicharts"

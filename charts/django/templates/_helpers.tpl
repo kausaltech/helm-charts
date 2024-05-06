@@ -40,6 +40,7 @@ helm.sh/chart: {{ include "django.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{ template "common.names.fullname" .Subcharts.redis }}-client: "true"
 {{- end }}
 
 {{/*
@@ -82,18 +83,28 @@ Create the name of the service account to use
 
 {{- define "django.envVariables" -}}
 env:
-{{- if .Values.db.cluster.create }}
+  {{- if .Values.db.cluster.create }}
   - name: DATABASE_URL
     valueFrom:
       secretKeyRef:
         name: {{ include "django.dbClusterName" . }}-app
         key: uri
-{{- end }}
-{{- if .Values.additionalEnv }}
+  - name: PGPASSFILE
+    value: /run/secrets/db-credentials/pgpass
+  {{- end }}
+  {{- if .Values.elasticsearch.enabled }}
+  - name: ELASTICSEARCH_URL
+    value: http://{{ template "elasticsearch.service.name" .Subcharts.elasticsearch }}:9200
+  {{- end }}
+  {{- if .Values.redis.enabled }}
+  - name: REDIS_URL
+    value: redis://{{ .Values.redis.password }}@{{ template "common.names.fullname" .Subcharts.redis }}-master
+  {{- end }}
+  {{- if .Values.additionalEnv }}
   {{- toYaml .Values.additionalEnv | nindent 2 }}
-{{- end }}
+  {{- end }}
 
-{{- if or .Values.envSecrets .Values.envConfigs }} 
+  {{- if or .Values.envSecrets .Values.envConfigs }} 
 envFrom:
   {{- if .Values.envSecrets }}
   - secretRef:
@@ -108,6 +119,38 @@ envFrom:
   {{- if .Values.additionalEnvFrom }}
     {{- toYaml .Values.additionalEnvFrom | nindent 2 }}
   {{- end }}
+  {{- end }}
+
 {{- end }}
 
+{{- define "django.secretVolumes" -}}
+{{- if and .Values.externalSecrets.enabled .Values.externalSecrets.targets }}
+{{- range .Values.externalSecrets.targets }}
+{{- if .mountPath }}
+- name: secret-{{ .name }}
+  secret:
+    secretName: {{ .name }}
+    defaultMode: 256
+{{- end }}{{- end }}{{- end }}
+{{- if $.Values.db.cluster.create }}
+- name: db-credentials
+  secret:
+    secretName: {{ include "django.dbClusterName" . }}-app
+    defaultMode: 256
+{{- end }}
+{{- end }}
+
+{{- define "django.secretVolumeMounts" -}}
+{{- if and .Values.externalSecrets.enabled .Values.externalSecrets.targets }}
+{{- range .Values.externalSecrets.targets }}
+{{- if .mountPath }}
+- name: secret-{{ .name }}
+  mountPath: {{ .mountPath }}
+  readOnly: true
+{{- end }}{{- end }}{{- end }}
+{{- if $.Values.db.cluster.create }}
+- name: db-credentials
+  mountPath: /run/secrets/db-credentials
+  readOnly: true
+{{- end }}
 {{- end }}

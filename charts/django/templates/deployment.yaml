@@ -107,6 +107,8 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            {{- include "django.secretVolumeMounts" . | nindent 12 }}
 
         {{- if .Values.proxy.enabled }}
         - name: {{ printf "%s-%s" .Chart.Name "proxy" }}
@@ -132,6 +134,7 @@ spec:
         {{- end }}
         - name: shared
           emptyDir: {}
+        {{- include "django.secretVolumes" . | nindent 8 }}
 
       {{- with .Values.nodeSelector }}
       nodeSelector:

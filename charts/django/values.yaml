@@ -150,8 +150,51 @@ redis:
     runAsUser: 1001
 
   networkPolicy:
+    enabled: true
     allowExternal: false
     allowExternalEgress: false
+    ingressNSPodMatchLabels:
+      redis-client: true
+
+elasticsearch:
+  enabled: false
+  master:
+    masterOnly: false
+    replicaCount: 1
+    heapSize: 512m
+    resourcesPreset: 'large'
+    persistence:
+      size: '5Gi'
+  data:
+    replicaCount: 0
+  coordinating:
+    replicaCount: 0
+  ingest:
+    replicaCount: 0
+  global:
+    storageClass: ""
+  #image:
+  #metrics:
+  #  enabled: true
+  #  serviceMonitor:
+  #    enabled: true
+
+externalSecrets:
+  enabled: false
+  secretStoreRef:
+    name: secretstore-sample
+    kind: ClusterSecretStore
+  refreshInterval: '24h'
+  creationPolicy: Owner
+  targets:
+    # - name: secret-to-be-created
+    #   mountPath: /run/secrets/ABCD
+    #   data:
+    #     - secretKey: username
+    #       remoteRef:
+    #         key: foo
+    #         property: my-value
+    #   dataFrom:
 
 serviceAccount:
   # Specifies whether a service account should be created
