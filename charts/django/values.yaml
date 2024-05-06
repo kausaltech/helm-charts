@@ -12,7 +12,7 @@ image:
   tag: "latest"
   containerPort: 8000
 
-command: "uwsgi --http11-socket :8000 --socket :8001 --processes 8 --enable-threads --buffer-size=32768 --static-map /static=/srv/static --static-map /media=/srv/media --module app.wsgi"
+command: "exec /scripts/docker-entrypoint.sh uwsgi"
 
 # Django Deployment Settings
 # Init Container to collect static files

@@ -3,7 +3,7 @@ dependencies:
   repository: https://charts.bitnami.com/bitnami
   version: 19.1.5
 - name: elasticsearch
-  repository: oci://registry-1.docker.io/bitnamicharts
+  repository: https://charts.bitnami.com/bitnami
   version: 21.0.2
-digest: sha256:9ba586e8312a0570ee54cf28ab8c92451158c4118cf374c25b89a85635843590
-generated: "2024-05-06T14:29:58.41999742+03:00"
+digest: sha256:70114d4b68e82630bd12a57a08c7986a8a51b2c3c241921ea4a3bc5ce244763c
+generated: "2024-05-06T15:06:44.722207748+03:00"
