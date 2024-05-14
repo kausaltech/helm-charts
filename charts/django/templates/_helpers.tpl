@@ -97,7 +97,7 @@ env:
   {{- end }}
   {{- if .Values.redis.enabled }}
   - name: REDIS_URL
-    value: redis://{{ .Values.redis.password }}@{{ template "common.names.fullname" .Subcharts.redis }}-master
+    value: redis://{{ if .Values.redis.auth.enabled }}{{ .Values.redis.auth.password }}@{{ end }}{{ template "common.names.fullname" .Subcharts.redis }}-master
   {{- end }}
   {{- if .Values.additionalEnv }}
   {{- toYaml .Values.additionalEnv | nindent 2 }}

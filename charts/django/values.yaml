@@ -126,7 +126,9 @@ celery:
 # Disable subchart by setting enabled value to false
 redis:
   enabled: true
-  password: redis
+  auth:
+    enabled: true
+    password: redis
   master:
     podSecurityContext:
       enabled: true
