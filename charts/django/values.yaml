@@ -138,6 +138,8 @@ redis:
       enabled: true
       runAsUser: 1001
 
+    disableCommands: []  # by default the Bitnami chart disables FLUSHDB and FLUSHALL, but Django needs those
+
   replica:
     podSecurityContext:
       enabled: true
