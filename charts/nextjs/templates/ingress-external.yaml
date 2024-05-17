@@ -1,0 +1,47 @@
+{{- if .Values.ingressExternal.enabled -}}
+{{- $fullName := include "nextjs-helm.fullname" . -}}
+{{- $svcPort := .Values.service.port -}}
+{{- $hasAnyHostWithTls := false }}
+{{- range .Values.ingressExternal.hosts }}
+  {{- if .tls }}
+    {{- $hasAnyHostWithTls = true }}
+  {{- end }}
+{{- end }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-external
+  labels:
+    {{- include "nextjs-helm.labels" . | nindent 4 }}
+  {{- with .Values.ingressExternal.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingressExternal.className }}
+  ingressClassName: {{ .Values.ingressExternal.className }}
+  {{- end }}
+  {{- if $hasAnyHostWithTls }}
+  tls:
+    {{- range .Values.ingressExternal.hosts }}
+    {{ if .tls }}
+    - hosts:
+      - {{ .host | quote }}
+      secretName: {{ .host | replace "." "-" }}-tls
+    {{- end }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingressExternal.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          - path: {{ .path }}
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $svcPort }}
+    {{- end }}
+{{- end }}
