@@ -2,6 +2,24 @@ apiVersion: v1
 entries:
   django:
   - apiVersion: v2
+    created: "2024-05-20T21:17:53.026343483Z"
+    dependencies:
+    - condition: redis.enabled
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: ^19
+    - condition: elasticsearch.enabled
+      name: elasticsearch
+      repository: https://charts.bitnami.com/bitnami
+      version: ^21
+    description: Deploy Django in Kubernetes
+    digest: dbc31048debff6c0ca12b6a8e32bab1c6d7632bc3a8424abdb53cf892b95cdc6
+    name: django
+    type: application
+    urls:
+    - https://github.com/kausaldev/helm-charts/releases/download/django-0.5.2/django-0.5.2.tgz
+    version: 0.5.2
+  - apiVersion: v2
     created: "2024-05-20T21:14:17.426464219Z"
     dependencies:
     - condition: redis.enabled
@@ -142,4 +160,4 @@ entries:
     urls:
     - https://github.com/kausaldev/helm-charts/releases/download/nextjs-0.2.1/nextjs-0.2.1.tgz
     version: 0.2.1
-generated: "2024-05-20T21:14:17.426494355Z"
+generated: "2024-05-20T21:17:53.026371836Z"
