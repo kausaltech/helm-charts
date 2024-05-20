@@ -11,6 +11,12 @@ spec:
       targetPort: django
       protocol: TCP
       name: django
+    {{- if .Values.proxy.enabled }}
+    - port: {{ .Values.proxy.containerPort }}
+      targetPort: django-caddy
+      protocol: TCP
+      name: django-caddy
+    {{- end }}
   selector:
     {{- include "django.labels" . | nindent 4 }}
     app.kubernetes.io/component: {{ include "django.fullname" . }}
