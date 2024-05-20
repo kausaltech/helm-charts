@@ -13,9 +13,9 @@ spec:
       name: django
     {{- if .Values.proxy.enabled }}
     - port: {{ .Values.proxy.containerPort }}
-      targetPort: django-caddy
+      targetPort: caddy
       protocol: TCP
-      name: django-caddy
+      name: caddy
     {{- end }}
   selector:
     {{- include "django.labels" . | nindent 4 }}
