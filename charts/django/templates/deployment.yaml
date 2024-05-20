@@ -114,6 +114,9 @@ spec:
         {{- if .Values.proxy.enabled }}
         - name: {{ printf "%s-%s" .Chart.Name "caddy" }}
           image:  "{{ include "django.appImage" . }}"
+          {{- if .Values.proxy.command }}
+          command:
+            {{- .Values.proxy.command | toYaml | nindent 12}}
           ports:
             - name: caddy
               containerPort: {{ .Values.proxy.containerPort }}

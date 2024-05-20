@@ -67,6 +67,7 @@ proxy:
   containerPort: 6000
   serveStatic: true
   serveMedia: true
+  # command: [caddy, run, -c, /etc/caddy/Caddyfile]
 
 # Env ConfigMap values
 envConfigs: {}
