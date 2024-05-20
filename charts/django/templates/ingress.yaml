@@ -1,6 +1,7 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "django.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}
+{{- $proxy := .Values.proxy -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -28,6 +29,26 @@ spec:
     - host: {{ .host | quote }}
       http:
         paths:
+          {{- if $proxy.enabled }}
+          {{- if $proxy.serveStatic }}
+          - path: /static
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $proxy.containerPort }}
+          {{- end }}
+          {{- if $proxy.serveMedia }}
+          - path: /media
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $proxy.containerPort }}
+          {{- end }}
+          {{- end }}
           {{- range .paths }}
           - path: {{ .path }}
             {{- if and .pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}

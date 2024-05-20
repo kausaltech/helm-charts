@@ -63,8 +63,7 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
+          {{- include "django.appImageConfig" . | nindent 10 }}
           {{-  with .Values.command }}
           command: ["/bin/sh"]
           args:
@@ -113,29 +112,37 @@ spec:
             {{- include "django.secretVolumeMounts" . | nindent 12 }}
 
         {{- if .Values.proxy.enabled }}
-        - name: {{ printf "%s-%s" .Chart.Name "proxy" }}
-          image:  "{{ .Values.proxy.repository }}:{{ .Values.proxy.tag }}"
+        - name: {{ printf "%s-%s" .Chart.Name "caddy" }}
+          image:  "{{ include "django.appImage" . }}"
           ports:
-            - name: http
+            - name: caddy
               containerPort: {{ .Values.proxy.containerPort }}
               protocol: TCP
           volumeMounts:
+          {{- if .Values.proxy.generateCaddyfile }}
             - name: caddy-config
               mountPath: /etc/caddy/Caddyfile
               subPath: Caddyfile
+          {{- end }}
+          {{- if not .Values.proxy.useAppImage }}
             - name: shared
               mountPath: /srv/{{ .Values.data.staticFiles }}
             - name: shared
               mountPath: /srv/{{ .Values.data.mediaFiles }}
+          {{- end }}
         {{- end }}
       volumes:
         {{- if .Values.proxy.enabled }}
+        {{- if .Values.proxy.generateCaddyfile }}
         - name: caddy-config
           configMap:
             name: caddy-config
         {{- end }}
+        {{- if not .Values.proxy.useAppImage }}
         - name: shared
           emptyDir: {}
+        {{- end }}
+        {{- end }}
         {{- include "django.secretVolumes" . | nindent 8 }}
 
       {{- with .Values.nodeSelector }}

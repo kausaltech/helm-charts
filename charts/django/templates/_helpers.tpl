@@ -30,6 +30,15 @@ Create chart name and version as used by the chart label.
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
+{{- define "django.appImage" -}}
+{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+{{- end }}
+
+{{- define "django.appImageConfig" -}}
+image: {{ include "django.appImage" . }}
+imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
+{{- end }}
+
 {{/*
 Common labels
 */}}
@@ -91,6 +100,10 @@ env:
   - name: PGPASSFILE
     value: /run/secrets/db-credentials/pgpass
   {{- end }}
+  {{- if .Values.proxy.enabled }}
+  - name: CADDY_PORT
+    value: "{{ .Values.proxy.containerPort }}"
+  {{- end }}
   {{- if .Values.elasticsearch.enabled }}
   - name: ELASTICSEARCH_URL
     value: http://{{ template "elasticsearch.service.name" .Subcharts.elasticsearch }}:9200
@@ -149,5 +162,13 @@ envFrom:
 - name: db-credentials
   mountPath: /run/secrets/db-credentials
   readOnly: true
+{{- end }}
+{{- end }}
+
+{{- define "django.proxyImageConfig "}}
+{{- if .Values.proxy.useAppImage }}
+{{- include "django.appImageConfig" . }}
+{{- else -}}
+image: {{ .Values.proxy.repository }}:{{ .Values.proxy.tag }}
 {{- end }}
 {{- end }}

@@ -56,13 +56,17 @@ service:
   type: ClusterIP
   port: 8000
 
-# Caddy Settings (Proxy Setup)
+# Caddy Settings (static + media files serving)
 proxy:
   enabled: false
   repository: caddy
+  tag: "2.7-alpine"
   pullPolicy: IfNotPresent
-  tag: "2.1.1-alpine"
-  containerPort: 8000
+  useAppImage: false
+  generateCaddyfile: true
+  containerPort: 6000
+  serveStatic: true
+  serveMedia: true
 
 # Env ConfigMap values
 envConfigs: {}
