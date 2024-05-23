@@ -40,6 +40,7 @@ jobs:
 
       - name: Compile jsonnet mixins
         run: |
+          export PATH=${PATH}:`go env GOPATH`/bin
           go install github.com/brancz/gojsontoyaml@latest
           cd jsonnet
           jb install
