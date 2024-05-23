@@ -28,6 +28,23 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
+      - name: Cache jsonnet deps
+        id: cache-primes
+        uses: actions/cache@v4
+        with:
+          path: ./jsonnet/vendor
+          key: ${{ runner.os }}-jsonnet
+
+      - name: Install jsonnet
+        uses: kobtea/setup-jsonnet-action@v2
+
+      - name: Compile jsonnet mixins
+        run: |
+          go install github.com/brancz/gojsontoyaml@latest
+          cd jsonnet
+          jb install
+          make
+
       - name: Add dependency repositories
         run: |
           for dir in $(ls -d charts/*/); do
