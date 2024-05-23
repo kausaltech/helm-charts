@@ -177,6 +177,17 @@ entries:
     urls:
     - https://github.com/kausaldev/helm-charts/releases/download/django-0.3.2/django-0.3.2.tgz
     version: 0.3.2
+  mixins:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2024-05-23T15:22:51.511568785Z"
+    description: Kubernetes mixins
+    digest: 9592755de4f1f8e3b384acbc6c22d8ebcc07a06311f76ba94aa94e1fb8761813
+    name: mixins
+    type: application
+    urls:
+    - https://github.com/kausaldev/helm-charts/releases/download/mixins-0.1.0/mixins-0.1.0.tgz
+    version: 0.1.0
   nextjs:
   - apiVersion: v2
     created: "2024-05-17T16:15:47.377747421Z"
@@ -214,4 +225,4 @@ entries:
     urls:
     - https://github.com/kausaldev/helm-charts/releases/download/nextjs-0.2.1/nextjs-0.2.1.tgz
     version: 0.2.1
-generated: "2024-05-21T12:14:33.754990526Z"
+generated: "2024-05-23T15:22:51.511602387Z"
