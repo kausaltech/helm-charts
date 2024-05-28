@@ -13,11 +13,11 @@ spec:
       {{- include "nextjs-helm.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
+        {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
+        {{- end }}
         checksum/configmap: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-      {{- end }}
       labels:
         {{- include "nextjs-helm.selectorLabels" . | nindent 8 }}
     spec:
