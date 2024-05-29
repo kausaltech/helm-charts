@@ -34,23 +34,63 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.command }}
+          command: [{{ .Values.command | quote }}]
+          {{- end }}
+          {{- if .Values.args }}
+          args:
+          {{- range .Values.args }}
+            - {{ . | quote }}
+          {{- end }}
+          {{- end }}
           envFrom:
           - configMapRef:
                 name: {{ include "nextjs-helm.fullname" . }}
           ports:
-            - name: http
+            - name: nextjs
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /_health
-              port: http
+              port: nextjs
           readinessProbe:
             httpGet:
               path: /_health
-              port: http
+              port: nextjs
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.staticProxy.resources | default .Values.resources | nindent 12 }}
+        {{- if .Values.staticProxy.enabled }}
+        - name: proxy
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: [{{ .Values.staticProxy.command | quote }}]
+          {{- if .Values.staticProxy.args }}
+          args:
+          {{- range .Values.staticProxy.args }}
+            - {{ . | quote }}
+          {{- end }}
+          {{- end }}
+          envFrom:
+          - configMapRef:
+                name: {{ include "nextjs-helm.fullname" . }}
+          ports:
+            - name: proxy
+              containerPort: {{ .Values.staticProxy.containerPort }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /_caddyhealth
+              port: proxy
+          readinessProbe:
+            httpGet:
+              path: /_caddyhealth
+              port: proxy
+          resources:
+            {{- toYaml (.Values.staticProxy.resources | default .Values.resources) | nindent 12 }}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

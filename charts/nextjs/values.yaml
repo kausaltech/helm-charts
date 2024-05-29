@@ -14,6 +14,9 @@ imagePullSecrets: []  # Probably you want to put here something like ["name": "<
 nameOverride: ""
 fullnameOverride: ""
 
+command: ""
+args: []
+
 configmap:
   data: {}  # Environment variables go here
 
@@ -42,6 +45,22 @@ securityContext: {}
 service:
   type: ClusterIP
   port: 3000
+  annotations: {}
+
+staticProxy:
+  enabled: false
+  hosts: []
+  #  - cdn.example.com
+
+  # Should the app traffic go through the proxy (in addition to the static assets)
+  proxyApp: false
+  containerPort: 3001
+  servicePort: 3001
+  resources:
+  securityContext:
+  command: ""
+  args: []
+
 
 ingress:
   enabled: false

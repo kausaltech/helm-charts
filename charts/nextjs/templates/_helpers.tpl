@@ -34,12 +34,17 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "nextjs-helm.labels" -}}
+{{- $appVersion := .Values.appVersion | default .Chart.AppVersion -}}
 helm.sh/chart: {{ include "nextjs-helm.chart" . }}
 {{ include "nextjs-helm.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- if $appVersion }}
+app.kubernetes.io/version: {{ $appVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/component: server
+{{- if .Values.partOf }}
+app.kubernetes.io/part-of: {{ .Values.partOf }}
+{{- end }}
 {{- end }}
 
 {{/*

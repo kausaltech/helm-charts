@@ -4,12 +4,22 @@ metadata:
   name: {{ include "nextjs-helm.fullname" . }}
   labels:
     {{- include "nextjs-helm.labels" . | nindent 4 }}
+  {{- if .Values.service.annotations }}
+  annotations:
+    {{- toYaml .Values.service.annotations | nindent 4 }}
+  {{- end }}
 spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: http
+      targetPort: nextjs
       protocol: TCP
-      name: http
+      name: nextjs
+    {{- if .Values.staticProxy.enabled }}
+    - port: {{ .Values.staticProxy.servicePort }}
+      targetPort: proxy
+      protocol: TCP
+      name: proxy
+    {{- end }}
   selector:
     {{- include "nextjs-helm.selectorLabels" . | nindent 4 }}

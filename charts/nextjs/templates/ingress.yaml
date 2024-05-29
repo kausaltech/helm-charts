@@ -1,6 +1,10 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "nextjs-helm.fullname" . -}}
+{{- $proxy := .Values.staticProxy -}}
 {{- $svcPort := .Values.service.port -}}
+{{- if (and $proxy.enabled $proxy.proxyApp) -}}
+{{- $svcPort = $proxy.servicePort -}}
+{{- end -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -17,6 +21,13 @@ spec:
   {{- end }}
   {{- if .Values.ingress.tls }}
   tls:
+    {{- if $proxy.enabled }}
+    - hosts:
+      {{- range $proxy.hosts }}
+      - {{ . | quote }}
+      {{- end }}
+      secretName: {{ include "nextjs-helm.fullname" . }}-proxy-cert
+    {{- end }}
     {{- range .Values.ingress.tls }}
     - hosts:
       {{- range .hosts }}
@@ -33,6 +44,20 @@ spec:
     {{- end }}
   {{- end }}
   rules:
+    {{- if $proxy.enabled }}
+    {{- range $proxy.hosts }}
+    - host: {{ . | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $proxy.servicePort }}
+    {{- end }}
+    {{- end }}
     {{- range .Values.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
