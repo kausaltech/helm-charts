@@ -16,14 +16,13 @@ spec:
       app.kubernetes.io/component: {{ include "django.fullname" . }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       labels:
         {{- include "django.labels" . | nindent 8 }}
         app.kubernetes.io/component: {{ include "django.fullname" . }}
       annotations:
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         checksum/env-configmap: {{ include (print $.Template.BasePath "/env-configmap.yaml") . | sha256sum }}
         checksum/env-secrets: {{ include (print $.Template.BasePath "/env-secrets.yaml") . | sha256sum }}
     spec:
