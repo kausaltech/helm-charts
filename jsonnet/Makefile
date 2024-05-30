@@ -1,7 +1,7 @@
 DEST=../charts/mixins/templates
 
 generate_manifests:
-	rm -rf ./mixins/templates/*
+	rm -rf $(DEST)/*
 	# Convert json to yaml
 	jsonnet main.jsonnet -J vendor -m $(DEST) | xargs -I{} sh -c 'cat {} | gojsontoyaml > {}.yaml' -- {}
 	# Remove all non yaml files

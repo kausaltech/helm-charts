@@ -19,7 +19,12 @@ local nodeExporterMixin = addMixin({
   name: 'node-exporter',
   dashboardFolder: 'General',
   mixin: (import 'node-mixin/mixin.libsonnet') + {
-    _config+:: {},
+    _config+:: {
+      nodeExporterSelector: 'job="node-exporter"'
+    },
+    grafanaDashboards:: std.mergePatch(super.grafanaDashboards, {
+      'nodes-darwin.json': null,
+    }),
   },
 });
 
