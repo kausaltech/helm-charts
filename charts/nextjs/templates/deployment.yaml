@@ -17,7 +17,8 @@ spec:
         {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-        checksum/configmap: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/env-configmap: {{ include (print $.Template.BasePath "/env-configmap.yaml") . | sha256sum }}
+        checksum/env-secrets: {{ include (print $.Template.BasePath "/env-secrets.yaml") . | sha256sum }}
       labels:
         {{- include "nextjs-helm.selectorLabels" . | nindent 8 }}
     spec:
@@ -43,9 +44,7 @@ spec:
             - {{ . | quote }}
           {{- end }}
           {{- end }}
-          envFrom:
-          - configMapRef:
-                name: {{ include "nextjs-helm.fullname" . }}
+          {{- include "nextjs-helm.envVariables" . | nindent 10 }}
           ports:
             - name: nextjs
               containerPort: {{ .Values.service.port }}
@@ -73,9 +72,7 @@ spec:
             - {{ . | quote }}
           {{- end }}
           {{- end }}
-          envFrom:
-          - configMapRef:
-                name: {{ include "nextjs-helm.fullname" . }}
+          {{- include "nextjs-helm.envVariables" . | nindent 10 }}
           ports:
             - name: proxy
               containerPort: {{ .Values.staticProxy.containerPort }}

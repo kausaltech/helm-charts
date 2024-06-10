@@ -17,8 +17,8 @@ fullnameOverride: ""
 command: ""
 args: []
 
-configmap:
-  data: {}  # Environment variables go here
+envConfigs: {}  # Environment variables go here
+envSecrets: {}  # Environment variables stored in a secret
 
 serviceAccount:
   # Specifies whether a service account should be created

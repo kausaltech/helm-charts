@@ -65,3 +65,26 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{- define "nextjs-helm.envVariables" -}}
+env:
+  {{- if .Values.additionalEnv }}
+  {{- toYaml .Values.additionalEnv | nindent 2 }}
+  {{- end }}
+
+{{-   if or .Values.envSecrets .Values.envConfigs }}
+envFrom:
+  {{-   if .Values.envSecrets }}
+  - secretRef:
+      name: {{ .Release.Name }}-env-secrets
+  {{-   end }}
+
+  {{-   if .Values.envConfigs }}
+  - configMapRef:
+      name: {{ .Release.Name }}-env-configmap
+  {{-   end }}
+  {{-   if .Values.additionalEnvFrom }}
+  {{-     toYaml .Values.additionalEnvFrom | nindent 2 }}
+  {{-   end }}
+{{-   end }}
+{{- end }}
