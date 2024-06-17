@@ -1,6 +1,10 @@
 {{- if .Values.ingressExternal.enabled -}}
 {{- $fullName := include "nextjs-helm.fullname" . -}}
+{{- $proxy := .Values.staticProxy -}}
 {{- $svcPort := .Values.service.port -}}
+{{- if (and $proxy.enabled $proxy.proxyApp) -}}
+{{- $svcPort = $proxy.servicePort -}}
+{{- end -}}
 {{- $hasAnyHostWithTls := false }}
 {{- range .Values.ingressExternal.hosts }}
   {{- if .tls }}
