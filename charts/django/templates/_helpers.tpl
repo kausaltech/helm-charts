@@ -112,11 +112,23 @@ env:
   - name: REDIS_URL
     value: redis://{{ if .Values.redis.auth.enabled }}:{{ .Values.redis.auth.password }}@{{ end }}{{ template "common.names.fullname" .Subcharts.redis }}-master
   {{- end }}
+  - name: NODE_NAME
+    valueFrom:
+      fieldRef:
+        fieldPath: spec.nodeName
+  - name: POD_NAME
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.name
+  - name: POD_NAMESPACE
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.namespace
   {{- if .Values.additionalEnv }}
   {{- toYaml .Values.additionalEnv | nindent 2 }}
   {{- end }}
 
-  {{- if or .Values.envSecrets .Values.envConfigs }} 
+  {{- if or .Values.envSecrets .Values.envConfigs }}
 envFrom:
   {{- if .Values.envSecrets }}
   - secretRef:
