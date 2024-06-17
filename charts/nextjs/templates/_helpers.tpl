@@ -71,6 +71,18 @@ env:
   {{- if .Values.additionalEnv }}
   {{- toYaml .Values.additionalEnv | nindent 2 }}
   {{- end }}
+  - name: NODE_NAME
+    valueFrom:
+      fieldRef:
+        fieldPath: spec.nodeName
+  - name: POD_NAME
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.name
+  - name: POD_NAMESPACE
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.namespace
 
 {{-   if or .Values.envSecrets .Values.envConfigs }}
 envFrom:
