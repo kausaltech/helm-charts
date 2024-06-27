@@ -169,6 +169,9 @@ envFrom:
 - name: secret-{{ .name }}
   mountPath: {{ .mountPath }}
   readOnly: true
+{{- if .subPath }}
+  subPath: {{ .subPath }}
+{{- end }}
 {{- end }}{{- end }}{{- end }}
 {{- if $.Values.db.cluster.create }}
 - name: db-credentials
