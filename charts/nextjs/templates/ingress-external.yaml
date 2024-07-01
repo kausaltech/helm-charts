@@ -36,7 +36,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.ingressExternal.hosts }}
+    {{- range .Values.externalHosts }}
     - host: {{ .host | quote }}
       http:
         paths:
