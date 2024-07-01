@@ -1,4 +1,4 @@
-{{- if .Values.ingressExternal.enabled and .Values.ingressExternal.hosts -}}
+{{- if (and .Values.ingressExternal.enabled .Values.ingressExternal.hosts) -}}
 {{- $fullName := include "nextjs-helm.fullname" . -}}
 {{- $proxy := .Values.staticProxy -}}
 {{- $svcPort := .Values.service.port -}}
