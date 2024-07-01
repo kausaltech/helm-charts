@@ -1,4 +1,4 @@
-{{- if (and .Values.ingressExternal.enabled .Values.ingressExternal.hosts) -}}
+{{- if (and .Values.ingressExternal.enabled .Values.externalHosts) -}}
 {{- $fullName := include "nextjs-helm.fullname" . -}}
 {{- $proxy := .Values.staticProxy -}}
 {{- $svcPort := .Values.service.port -}}
@@ -6,7 +6,7 @@
 {{- $svcPort = $proxy.servicePort -}}
 {{- end -}}
 {{- $hasAnyHostWithTls := false }}
-{{- range .Values.ingressExternal.hosts }}
+{{- range .Values.externalHosts }}
   {{- if .tls }}
     {{- $hasAnyHostWithTls = true }}
   {{- end }}
@@ -27,7 +27,7 @@ spec:
   {{- end }}
   {{- if $hasAnyHostWithTls }}
   tls:
-    {{- range .Values.ingressExternal.hosts }}
+    {{- range .Values.externalHosts }}
     {{ if .tls }}
     - hosts:
       - {{ .host | quote }}
