@@ -20,6 +20,10 @@ args: []
 envConfigs: {}  # Environment variables go here
 envSecrets: {}  # Environment variables stored in a secret
 
+healthCheck:
+  enabled: true
+  path: /_health
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: false
