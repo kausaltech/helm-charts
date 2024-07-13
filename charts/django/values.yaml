@@ -5,6 +5,8 @@
 # Django Deployment Values
 replicaCount: 1
 revisionHistoryLimit: 2
+# Can be used to override the AppVersion from chart
+appVersion:
 image:
   repository: ghcr.io/sanoguzhan/django-helm-test
   pullPolicy: IfNotPresent
@@ -106,6 +108,7 @@ celery:
     command: "celery -A app.celery worker -l DEBUG"
     replicaCount: 1
     strategy: RollingUpdate
+    healthCheckCmd: ""  # e.g. celery inspect ping -A app -d celery@$HOSTNAME
 # Celery Flower Settings
   flower:
     enabled: false

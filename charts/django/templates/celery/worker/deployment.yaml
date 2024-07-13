@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ printf "%s-%s" .Release.Name .Values.celery.worker.componentName }}
+  name: {{ include "django.fullname" . }}-{{ .Values.celery.worker.componentName }}
   labels:
     {{- include "django.labels" . | nindent 4 }}
     app.kubernetes.io/component: {{ .Values.celery.worker.componentName }}
@@ -13,18 +13,20 @@ spec:
   selector:
     matchLabels:
       {{- include "django.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: {{ .Values.celery.worker.componentName }}
   strategy:
     type: {{ .Values.celery.worker.strategy }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-        checksum/config: {{ include (print $.Template.BasePath "/env-configmap.yaml") . | sha256sum }}
-      {{- end }}
       labels:
-        {{- include "django.selectorLabels" . | nindent 8 }}
+        {{- include "django.labels" . | nindent 8 }}
         app.kubernetes.io/component: {{ .Values.celery.worker.componentName }}
+      annotations:
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        checksum/env-configmap: {{ include (print $.Template.BasePath "/env-configmap.yaml") . | sha256sum }}
+        checksum/env-secrets: {{ include (print $.Template.BasePath "/env-secrets.yaml") . | sha256sum }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -33,8 +35,17 @@ spec:
       serviceAccountName: {{ include "django.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: wait-for-django
+          image: bitnami/kubectl
+          imagePullPolicy: IfNotPresent
+          args:
+            - wait
+            - deployments/{{ include "django.fullname" . }}
+            - --for=condition=available
+            - --timeout=300s
       containers:
-        - name: {{ .Chart.Name }}
+        - name: celery-worker
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -46,9 +57,16 @@ spec:
               - >-
                   {{ . }}
           {{- end }}
+          # TODO: Add liveness and readiness probes, e.g. https://github.com/celery/celery/issues/4079
           {{- include "django.envVariables" . | nindent 10 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            {{- include "django.secretVolumeMounts" . | nindent 12 }}
+
+      volumes:
+        {{- include "django.secretVolumes" . | nindent 8 }}
+
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

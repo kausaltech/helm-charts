@@ -45,7 +45,7 @@ Common labels
 {{- define "django.labels" -}}
 {{ include "django.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+app.kubernetes.io/version: {{ (default .Chart.AppVersion .Values.appVersion ) | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{ template "common.names.fullname" .Subcharts.redis }}-client: "true"
