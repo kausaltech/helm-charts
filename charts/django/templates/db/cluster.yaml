@@ -1,16 +1,17 @@
 {{- if .Values.db.cluster.create -}}
+{{- $pgcluster := .Values.db.cluster -}}
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: {{ include "django.dbClusterName" . }}
 spec:
-  instances: {{ .Values.db.cluster.instances | default 3 }}
+  instances: {{ $cluster.instances }}
   {{- if .Values.db.postgis }}
-  imageName: ghcr.io/cloudnative-pg/postgis:{{ .Values.db.cluster.version }}
+  imageName: ghcr.io/cloudnative-pg/postgis:{{ $pgcluster.version }}
   {{- else }}
-  imageName: ghcr.io/cloudnative-pg/postgresql:{{ .Values.db.cluster.version }}
+  imageName: ghcr.io/cloudnative-pg/postgresql:{{ $pgcluster.version }}
   {{- end }}
-  {{- with .Values.db.cluster.affinity }}
+  {{- with $pgcluster.affinity }}
   affinity:
     {{- toYaml . | nindent 4 }}
   {{- end }}
@@ -18,10 +19,6 @@ spec:
     initdb:
       database: {{ .Values.db.database }}
       owner: {{ .Values.db.user }}
-      {{ if not .Values.db.cluster.create -}}
-      secret:
-        name: {{ include "django.dbSecretName" . }}
-      {{- end }}
       {{- if .Values.db.postgis }}
       postInitTemplateSQL:
         - CREATE EXTENSION postgis;
@@ -33,25 +30,27 @@ spec:
   #               the switchover of the primary
   primaryUpdateStrategy: unsupervised
   storage:
-    size: {{ .Values.db.cluster.size }}
-    {{- if .Values.db.cluster.storageClass }}
-    storageClass: {{ .Values.db.cluster.storageClass }}
+    size: {{ $pgcluster.size }}
+    {{- if $pgcluster.storageClass }}
+    storageClass: {{ $pgcluster.storageClass }}
     {{- end -}}
-  {{- if .Values.db.cluster.backup.enabled }}
+  {{- if $pgcluster.backup.enabled }}
+  {{- $pgbackup := $pgcluster.backup }}
   backup:
     target: prefer-standby
-    retentionPolicy: "30d"
+    retentionPolicy: "{{ $pgbackup.retentionPolicy }}"
     barmanObjectStore:
-      destinationPath: {{ .Values.db.cluster.backup.destinationPath }}
-      endpointURL: {{ .Values.db.cluster.backup.endpointUrl }}
+      destinationPath: {{ $pgbackup.destinationPath }}
+      endpointURL: {{ $pgbackup.endpointUrl }}
       s3Credentials:
         accessKeyId:
-          name: {{ include "django.dbBackupS3SecretName" . }}
-          key: AWS_ACCESS_KEY_ID
+          name: {{ $pgbackup.s3Secret.name | required "Value db.cluster.backup.s3Secret.name required" }}
+          key: {{ $pgbackup.accessKeyName }}
         secretAccessKey:
-          name: {{ include "django.dbBackupS3SecretName" . }}
-          key: AWS_SECRET_ACCESS_KEY
+          name: {{ $pgbackup.s3Secret.name }}
+          key: {{ $pgbackup.secretAccessKeyName }}
   {{- end }}
+  {{/* TODO: How to enable this safely? */}}
   {{- if .Values.db.cluster.bootstrapRecovery.enabled }}
   bootstrap:
     recovery:

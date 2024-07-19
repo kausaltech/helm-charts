@@ -265,7 +265,6 @@ db:
   postgis: false
   cluster:
     create: true
-    nodeSelector: {}
     affinity: {}
     version: '16'
     instances: 3
@@ -274,13 +273,14 @@ db:
     name: "" # if empty, will be generated using fullname template
     backup:
       enabled: false
+      target: prefer-standby
+      retentionPolicy: '30d'
       s3Secret:
-        create: false
-        name: "" # if empty, will be generated using fullname template
-        awsAccessKeyId: ""
-        awsSecretAccessKey: ""
-      endpointUrl: ""
-      destinationPath: ""
+        name: ""  # must be set
+        accessKeyName: "AWS_ACCESS_KEY_ID"
+        secretAccessKeyName: "AWS_SECRET_ACCESS_KEY"
+      endpointUrl: ""  # must be set
+      destinationPath: ""  # must be set; format has to be "s3://<bucket>/[your-backup-folder]/"
     bootstrapRecovery:
       enabled: false  # if true, will use S3 storage from db.cluster.backup as source
     scheduledBackup:
