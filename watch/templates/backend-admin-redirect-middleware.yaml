@@ -1,8 +1,0 @@
-apiVersion: traefik.io/v1alpha1
-kind: Middleware
-metadata:
-  name: {{ include "watch.backendAdminRedirectMiddlewareName" . }}
-spec:
-  redirectRegex:
-    regex: ^https://{{ (include "watch.backendAdminHost" .) | replace "." "\\." }}/$
-    replacement: https://{{ include "watch.backendAdminHost" . }}/admin/

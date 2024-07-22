@@ -260,12 +260,13 @@ db:
   user: django
   password: ""
   secret:
-    create: true
+    create: false
     name: "" # if empty, will be generated using fullname template
   postgis: false
   cluster:
     create: true
     affinity: {}
+    dataChecksums: true
     version: '16'
     instances: 3
     size: '1Gi'

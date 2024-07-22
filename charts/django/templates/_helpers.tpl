@@ -79,10 +79,7 @@ Create the name of the service account to use
 {{- end }}
 
 {{- define "django.dbSecretName" -}}
-{{- if .Values.db.cluster.create }}
 {{- default (printf "%s-db-credentials" (include "django.fullname" .)) .Values.db.secret.name }}
-{{- else }}
-{{- end }}
 {{- end }}
 
 {{- define "django.dbScheduledBackupName" -}}
