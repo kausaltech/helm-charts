@@ -1,9 +1,9 @@
 dependencies:
 - name: redis
   repository: https://charts.bitnami.com/bitnami
-  version: 19.1.5
+  version: 19.6.2
 - name: elasticsearch
   repository: https://charts.bitnami.com/bitnami
-  version: 21.0.2
-digest: sha256:70114d4b68e82630bd12a57a08c7986a8a51b2c3c241921ea4a3bc5ce244763c
-generated: "2024-05-06T15:06:44.722207748+03:00"
+  version: 21.3.2
+digest: sha256:cbf83046c0b46e24850af0e04d9aee47d9e3b2daf0ecb33f7b88c9d3e05f481e
+generated: "2024-07-22T14:09:49.191732738+03:00"
