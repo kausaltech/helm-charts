@@ -217,6 +217,10 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
+# Annotations for all deployments (django, celery, etc.)
+commonPodAnnotations: {}
+
+# Annotations for the Django pod only
 podAnnotations: {}
 
 podSecurityContext: {}

@@ -22,7 +22,7 @@ spec:
         {{- include "django.labels" . | nindent 8 }}
         app.kubernetes.io/component: {{ .Values.celery.worker.componentName }}
       annotations:
-        {{- with .Values.podAnnotations }}
+        {{- with .Values.commonPodAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
         checksum/env-configmap: {{ include (print $.Template.BasePath "/env-configmap.yaml") . | sha256sum }}

@@ -18,7 +18,7 @@ spec:
     type: {{ .Values.celery.flower.strategy }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
+      {{- with .Values.commonPodAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
         checksum/config: {{ include (print $.Template.BasePath "/env-configmap.yaml") . | sha256sum }}
