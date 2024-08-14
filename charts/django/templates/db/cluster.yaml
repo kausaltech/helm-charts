@@ -46,10 +46,10 @@ spec:
       s3Credentials:
         accessKeyId:
           name: {{ $pgbackup.s3Secret.name | required "Value db.cluster.backup.s3Secret.name required" }}
-          key: {{ $pgbackup.accessKeyName }}
+          key: {{ $pgbackup.s3Secret.accessKeyName }}
         secretAccessKey:
           name: {{ $pgbackup.s3Secret.name }}
-          key: {{ $pgbackup.secretAccessKeyName }}
+          key: {{ $pgbackup.s3Secret.secretAccessKeyName }}
   {{- end }}
   {{/* TODO: How to enable this safely? */}}
   {{- if .Values.db.cluster.bootstrapRecovery.enabled }}
