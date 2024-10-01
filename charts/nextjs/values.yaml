@@ -60,7 +60,7 @@ staticProxy:
   proxyApp: false
   containerPort: 3001
   servicePort: 3001
-  resources:
+  resources: {}
   securityContext:
   command: ""
   args: []

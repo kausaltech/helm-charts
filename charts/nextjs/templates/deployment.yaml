@@ -60,7 +60,7 @@ spec:
               port: nextjs
           {{- end }}
           resources:
-            {{- toYaml .Values.staticProxy.resources | default .Values.resources | nindent 12 }}
+            {{- toYaml .Values.resources | nindent 12 }}
         {{- if .Values.staticProxy.enabled }}
         - name: proxy
           securityContext:
