@@ -306,6 +306,16 @@ entries:
   mixins:
   - apiVersion: v2
     appVersion: 0.1.0
+    created: "2024-10-01T11:47:17.713105525Z"
+    description: Kubernetes mixins
+    digest: c2f80bc9a4d8cefaefd16eeefe2edfa53bd71175fd60ca11b3ce4a0e948ee6a0
+    name: mixins
+    type: application
+    urls:
+    - https://github.com/kausaltech/helm-charts/releases/download/mixins-0.2.4/mixins-0.2.4.tgz
+    version: 0.2.4
+  - apiVersion: v2
+    appVersion: 0.1.0
     created: "2024-08-24T22:01:54.378028084Z"
     description: Kubernetes mixins
     digest: 1b1a47128e636d4a96a816cc76b1dc20a5f50bbcbe52d61327135693fb7527c6
@@ -355,6 +365,15 @@ entries:
     - https://github.com/kausaldev/helm-charts/releases/download/mixins-0.1.0/mixins-0.1.0.tgz
     version: 0.1.0
   nextjs:
+  - apiVersion: v2
+    created: "2024-10-01T11:47:17.851203803Z"
+    description: Deploy a NextJS app in Kubernetes
+    digest: 1ee613eb7fd0e2c65886a7b37ad6fa0598cf3a20e8bb80b1458b2f13e13c1e04
+    name: nextjs
+    type: application
+    urls:
+    - https://github.com/kausaltech/helm-charts/releases/download/nextjs-0.3.9/nextjs-0.3.9.tgz
+    version: 0.3.9
   - apiVersion: v2
     created: "2024-07-08T13:07:37.999701337Z"
     description: Deploy a NextJS app in Kubernetes
@@ -490,4 +509,4 @@ entries:
     urls:
     - https://github.com/kausaldev/helm-charts/releases/download/nextjs-0.2.1/nextjs-0.2.1.tgz
     version: 0.2.1
-generated: "2024-08-24T22:01:54.378123823Z"
+generated: "2024-10-01T11:47:17.851359534Z"
