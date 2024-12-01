@@ -275,6 +275,8 @@ db:
     instances: 3
     size: '1Gi'
     storageClass: ''
+    enablePodMonitor: true
+    parameters: {}  # key-value pairs to be placed in the postgres config file
     name: "" # if empty, will be generated using fullname template
     backup:
       enabled: false

@@ -30,6 +30,15 @@ spec:
   # - supervised: requires manual supervision to perform
   #               the switchover of the primary
   primaryUpdateStrategy: unsupervised
+  {{- if $pgcluster.enablePodMonitor }}
+  monitoring:
+    enablePodMonitor: true
+  {{- end }}
+  {{- if $pgcluster.parameters }}
+  postgresql:
+    parameters:
+      {{- toYaml $pgcluster.parameters | nindent 6 }}
+  {{- end }}
   storage:
     size: {{ $pgcluster.size }}
     {{- if $pgcluster.storageClass }}
