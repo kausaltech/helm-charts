@@ -2,6 +2,24 @@ apiVersion: v1
 entries:
   django:
   - apiVersion: v2
+    created: "2024-12-01T11:51:12.641865183Z"
+    dependencies:
+    - condition: redis.enabled
+      name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: ^19
+    - condition: elasticsearch.enabled
+      name: elasticsearch
+      repository: https://charts.bitnami.com/bitnami
+      version: ^21
+    description: Deploy Django in Kubernetes
+    digest: 2773bb980f6322d501158e9fbfdd41bcf410d4fd091b9c2e942fb69a8ef9c6d4
+    name: django
+    type: application
+    urls:
+    - https://github.com/kausaltech/helm-charts/releases/download/django-0.6.6/django-0.6.6.tgz
+    version: 0.6.6
+  - apiVersion: v2
     created: "2024-08-14T13:29:36.914672873Z"
     dependencies:
     - condition: redis.enabled
@@ -306,6 +324,16 @@ entries:
   mixins:
   - apiVersion: v2
     appVersion: 0.1.0
+    created: "2024-12-01T11:51:12.782115372Z"
+    description: Kubernetes mixins
+    digest: 94cb6616308b18a068bc2266086d7f498089ddcdc4011a85a6b8fab3bfa1242c
+    name: mixins
+    type: application
+    urls:
+    - https://github.com/kausaltech/helm-charts/releases/download/mixins-0.2.5/mixins-0.2.5.tgz
+    version: 0.2.5
+  - apiVersion: v2
+    appVersion: 0.1.0
     created: "2024-10-01T11:47:17.713105525Z"
     description: Kubernetes mixins
     digest: c2f80bc9a4d8cefaefd16eeefe2edfa53bd71175fd60ca11b3ce4a0e948ee6a0
@@ -509,4 +537,4 @@ entries:
     urls:
     - https://github.com/kausaldev/helm-charts/releases/download/nextjs-0.2.1/nextjs-0.2.1.tgz
     version: 0.2.1
-generated: "2024-10-01T11:47:17.851359534Z"
+generated: "2024-12-01T11:51:12.782259452Z"
