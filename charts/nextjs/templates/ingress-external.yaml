@@ -11,13 +11,30 @@
     {{- $hasAnyHostWithTls = true }}
   {{- end }}
 {{- end -}}
+{{- /*
+If .Values.traefikMiddlewares is nonempty, we add a new item to .Values.ingressExternal.annotations:
+The key of this extra item is "traefik.ingress.kubernetes.io/router.middlewares".
+The value is a comma-separated list of items of the form "<namespace>-<x>@kubernetescrd", where <namespace> is the release namespace and <x> is an item in .Values.traefikMiddlewares.
+To the best of my knowledge, we need to construct this string in this template instead of letting users specify a Traefik middleware annotation themselves in ingressExternal.annotations because the names must contain the namespace, which is not available in the values.yaml file (or wherever the user overrides the values).
+*/}}
+{{- $additionalAnnotations := dict }}
+{{- if .Values.traefikMiddlewares }}
+  {{- $namespace := .Release.Namespace }}
+  {{- $middlewares := list }}
+  {{- range $name, $spec := .Values.traefikMiddlewares }}
+    {{- $middleware := printf "%s-%s@kubernetescrd" $namespace $name }}
+    {{- $middlewares = append $middlewares $middleware }}
+  {{- end }}
+  {{- $additionalAnnotations = dict "traefik.ingress.kubernetes.io/router.middlewares" (join "," $middlewares) }}
+{{- end }}
+{{- $mergedAnnotations := merge .Values.ingressExternal.annotations $additionalAnnotations }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}-external
   labels:
     {{- include "nextjs-helm.labels" . | nindent 4 }}
-  {{- with .Values.ingressExternal.annotations }}
+  {{- with $mergedAnnotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}

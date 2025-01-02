@@ -99,6 +99,13 @@ externalHosts: []
 #    tls: true
 #    path: /
 
+# If `traefikMiddlewares` is nonempty, middleware resources are created and a `traefik.ingress.kubernetes.io/router.middlewares` annotation is added to the ones already in `ingressExternal.annotations`
+traefikMiddlewares: {}
+  # example-redirect:
+  #   redirectRegex:
+  #     regex: ^https://example\.com/$
+  #     replacement: https://example\.org/
+
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
