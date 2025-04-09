@@ -293,3 +293,8 @@ db:
     scheduledBackup:
       create: false
       name: "" # if empty, will be generated using fullname template
+
+djangoCronJobs: []
+  # - name: backup-cronjob
+  #   command: backup.sh
+  #   schedule: "0 3 * * *"  # daily at 3 a.m.

@@ -1,0 +1,25 @@
+{{- range .Values.djangoCronJobs }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .name }}
+spec:
+  schedule: {{ .schedule }}
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: cronjob-serviceaccount
+          containers:
+          - name: kubectl-job
+            image: bitnami/kubectl:latest
+            command:
+            - /bin/sh
+            - -c
+            - |
+              POD_NAME=$(kubectl get pods -l app.kubernetes.io/component={{ include "django.fullname" . }} -o jsonpath='{.items[0].metadata.name}')
+              kubectl exec $POD_NAME -- {{ .command }}
+          restartPolicy: OnFailure
+{{- end }}
