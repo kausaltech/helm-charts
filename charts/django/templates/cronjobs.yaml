@@ -13,11 +13,11 @@ spec:
         spec:
           {{- with $.Values.imagePullSecrets }}
           imagePullSecrets:
-            {{- toYaml . | nindent 8 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           serviceAccountName: {{ include "django.serviceAccountName" $ }}
           securityContext:
-            {{- toYaml $.Values.podSecurityContext | nindent 8 }}
+            {{- toYaml $.Values.podSecurityContext | nindent 12 }}
           initContainers:
             - name: wait-for-django
               image: bitnami/kubectl
@@ -30,7 +30,7 @@ spec:
           containers:
             - name: {{ .name }}
               securityContext:
-                {{- toYaml $.Values.securityContext | nindent 12 }}
+                {{- toYaml $.Values.securityContext | nindent 16 }}
               image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag | default $.Chart.AppVersion }}"
               imagePullPolicy: {{ $.Values.image.pullPolicy }}
               command: ["/bin/sh"]
@@ -39,25 +39,25 @@ spec:
                   - >-
                       {{ .command }}
               # TODO: Add liveness and readiness probes, e.g. https://github.com/celery/celery/issues/4079
-              {{- include "django.envVariables" $ | nindent 10 }}
+              {{- include "django.envVariables" $ | nindent 14 }}
               resources:
-                {{- toYaml $.Values.resources | nindent 12 }}
+                {{- toYaml $.Values.resources | nindent 16 }}
               volumeMounts:
-                {{- include "django.secretVolumeMounts" $ | nindent 12 }}
+                {{- include "django.secretVolumeMounts" $ | nindent 16 }}
 
           volumes:
-            {{- include "django.secretVolumes" $ | nindent 8 }}
+            {{- include "django.secretVolumes" $ | nindent 12 }}
 
           {{- with $.Values.nodeSelector }}
           nodeSelector:
-            {{- toYaml . | nindent 8 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with $.Values.affinity }}
           affinity:
-            {{- toYaml . | nindent 8 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with $.Values.tolerations }}
           tolerations:
-            {{- toYaml . | nindent 8 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
 {{- end }}
