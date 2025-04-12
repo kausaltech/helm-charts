@@ -62,6 +62,18 @@ local prometheusOperatorMixin = addMixin({
   },
 });
 
+local lokiMixin = addMixin({
+  name: 'loki',
+  dashboardFolder: 'Loki',
+  mixin: (import 'loki-mixin/mixin-ssd.libsonnet') + {
+    _config+:: {
+      promtail+: {
+        enabled: true,
+      },
+    },
+  },
+});
+
 local removeJsonExtension(name) =
   local extensionIndex = std.findSubstr('.json', name);
   local n = if std.length(extensionIndex) < 1 then name else std.substr(name, 0, extensionIndex[0]);
@@ -94,6 +106,7 @@ local corednsMixinHelmGrafanaDashboards = generateGrafanaDashboardConfigMaps(cor
 local grafanaMixinHelmGrafanaDashboards = generateGrafanaDashboardConfigMaps(grafanaMixin);
 local prometheusMixinHelmGrafanaDashboards = generateGrafanaDashboardConfigMaps(prometheusMixin);
 local prometheusOperatorMixinHelmGrafanaDashboards = generateGrafanaDashboardConfigMaps(prometheusOperatorMixin);
+local lokiMixinHelmGrafanaDashboards = generateGrafanaDashboardConfigMaps(lokiMixin);
 
 local defaultDashboards =
   kubernetesMixinHelmGrafanaDashboards +
@@ -101,7 +114,8 @@ local defaultDashboards =
   corednsMixinHelmGrafanaDashboards +
   grafanaMixinHelmGrafanaDashboards +
   prometheusMixinHelmGrafanaDashboards +
-  prometheusOperatorMixinHelmGrafanaDashboards;
+  prometheusOperatorMixinHelmGrafanaDashboards +
+  lokiMixinHelmGrafanaDashboards;
 
 
 local defaultAlerts = {
@@ -111,6 +125,7 @@ local defaultAlerts = {
   'grafana-mixin-rules': grafanaMixin.prometheusRules,
   'prometheus-mixin-rules': prometheusMixin.prometheusRules,
   'prometheus-operator-mixin-rules': prometheusOperatorMixin.prometheusRules,
+  'loki-mixin-rules': lokiMixin.prometheusRules,
 };
 
 defaultDashboards + defaultAlerts
