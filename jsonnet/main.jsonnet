@@ -65,9 +65,18 @@ local prometheusOperatorMixin = addMixin({
 local lokiMixin = addMixin({
   name: 'loki',
   dashboardFolder: 'Loki',
-  mixin: (import 'loki-mixin/mixin-ssd.libsonnet') + {
+  mixin: (import 'loki-mixin/mixin.libsonnet') + {
     _config+:: {
       promtail+: {
+        enabled: true,
+      },
+      blooms+: {
+        enabled: false,
+      },
+      #ssd+: {
+      #  pod_prefix_matcher: 'loki',
+      #},
+      meta_monitoring+: {
         enabled: true,
       },
     },
@@ -77,7 +86,7 @@ local lokiMixin = addMixin({
 local removeJsonExtension(name) =
   local extensionIndex = std.findSubstr('.json', name);
   local n = if std.length(extensionIndex) < 1 then name else std.substr(name, 0, extensionIndex[0]);
-  n;
+  std.strReplace(n, '_', '-');
 
 local grafanaDashboardConfigMap(folder, name, json) = {
   apiVersion: 'v1',
