@@ -11,6 +11,7 @@ spec:
     spec:
       template:
         spec:
+          restartPolicy: OnFailure
           {{- with $.Values.imagePullSecrets }}
           imagePullSecrets:
             {{- toYaml . | nindent 12 }}
