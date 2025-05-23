@@ -67,7 +67,18 @@ dbMigrations:
   command: "python3 manage.py migrate --noinput"
   resources: {}
   safeToEvict: true
+  # Restart policy for the migration job pod
+  # - "OnFailure": Restart the pod if it fails (default behavior, failed pods may be removed)
+  # - "Never": Don't restart on failure, keep failed pods for debugging
+  restartPolicy: OnFailure
 
+```
+
+**Debugging Failed Migrations:** To debug failed migration jobs, set `restartPolicy: Never`. This will prevent failed pods from being restarted and removed, allowing you to inspect logs and debug the issue:
+
+```yaml
+dbMigrations:
+  restartPolicy: Never
 ```
 
 ## ConfigMaps and Secrets

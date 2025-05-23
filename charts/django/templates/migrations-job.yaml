@@ -22,7 +22,7 @@ spec:
         {{- include "django.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: {{ include "django.fullname" . }}
     spec:
-      restartPolicy: OnFailure
+      restartPolicy: {{ .Values.dbMigrations.restartPolicy | default "OnFailure" }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}

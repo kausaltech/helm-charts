@@ -30,6 +30,10 @@ dbMigrations:
   command: "python3 manage.py migrate --noinput"
   resources: {}
   safeToEvict: true
+  # Restart policy for the migration job pod.
+  # - "OnFailure": Restart the pod if it fails
+  # - "Never": Don't restart on failure, keep failed pods for debugging
+  restartPolicy: Never
 
 # Django Static files and Media data folders
 # Set to path from working directory
