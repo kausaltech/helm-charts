@@ -6,6 +6,12 @@ metadata:
   name: {{ include "django.dbClusterName" . }}
 spec:
   instances: {{ $pgcluster.instances }}
+  {{- if $pgcluster.stopDelay }}
+  stopDelay: {{ $pgcluster.stopDelay }}
+  {{- end }}
+  {{- if $pgcluster.smartShutdownTimeout }}
+  smartShutdownTimeout: {{ $pgcluster.smartShutdownTimeout }}
+  {{- end }}
   {{- if .Values.db.postgis }}
   imageName: ghcr.io/cloudnative-pg/postgis:{{ $pgcluster.version }}
   {{- else }}
@@ -35,6 +41,7 @@ spec:
     enablePodMonitor: true
   {{- end }}
   {{- if $pgcluster.parameters }}
+
   postgresql:
     parameters:
       {{- toYaml $pgcluster.parameters | nindent 6 }}

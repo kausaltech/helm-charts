@@ -277,6 +277,8 @@ db:
     dataChecksums: true
     version: '16'
     instances: 3
+    # stopDelay: 1800  # Time in seconds allowed for PostgreSQL instance to gracefully shutdown (default: 1800)
+    # smartShutdownTimeout: 180  # Time in seconds reserved for smart shutdown to complete. Ensure enough time for fast shutdown (stopDelay - smartShutdownTimeout)
     size: '1Gi'
     storageClass: ''
     enablePodMonitor: true
