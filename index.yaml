@@ -560,6 +560,15 @@ entries:
     version: 0.1.0
   nextjs:
   - apiVersion: v2
+    created: "2025-10-06T10:20:06.267760512Z"
+    description: Deploy a NextJS app in Kubernetes
+    digest: aeec2ceb8531cd2e44ea01c677c0f6c7cc768311d0849913bd9ec058bdc91313
+    name: nextjs
+    type: application
+    urls:
+    - https://github.com/kausaltech/helm-charts/releases/download/nextjs-0.3.11/nextjs-0.3.11.tgz
+    version: 0.3.11
+  - apiVersion: v2
     created: "2025-01-02T15:30:33.112793017Z"
     description: Deploy a NextJS app in Kubernetes
     digest: f6d08d3f4ee4c4ddf86c1b2ad4c4303addfad311f9ef53c348101816f163c3fc
@@ -712,4 +721,4 @@ entries:
     urls:
     - https://github.com/kausaldev/helm-charts/releases/download/nextjs-0.2.1/nextjs-0.2.1.tgz
     version: 0.2.1
-generated: "2025-09-20T11:27:32.318736925Z"
+generated: "2025-10-06T10:20:06.268023293Z"
