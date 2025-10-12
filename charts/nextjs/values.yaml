@@ -99,6 +99,24 @@ externalHosts: []
 #    tls: true
 #    path: /
 
+externalTlsSecrets:
+  ingress:
+    annotations: {}
+    className: ""
+  enabled: false
+  secretStoreRef:
+    name: secretstore-sample
+    kind: ClusterSecretStore
+  refreshInterval: '24h'
+  creationPolicy: Owner
+  secrets:
+    - name: chart-example-local-tls
+      key: path/to/secret
+  hosts:
+    - host: chart-example.local
+      path: /
+      secretName: chart-example-local-tls
+
 # If `traefikMiddlewares` is nonempty, middleware resources are created and a `traefik.ingress.kubernetes.io/router.middlewares` annotation is added to the ones already in `ingressExternal.annotations`
 traefikMiddlewares: {}
   # example-redirect:
