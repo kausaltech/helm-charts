@@ -19,15 +19,20 @@ To the best of my knowledge, we need to construct this string in this template i
 */}}
 {{- $additionalAnnotations := dict }}
 {{- if .Values.traefikMiddlewares }}
+  {{- $ann := .Values.ingressExternal.annotations }}
   {{- $namespace := .Release.Namespace }}
   {{- $middlewares := list }}
+  {{- $existingMiddlewares := get $ann "traefik.ingress.kubernetes.io/router.middlewares" }}
+  {{- if $existingMiddlewares }}
+    {{- $middlewares = append $middlewares $existingMiddlewares }}
+  {{- end }}
   {{- range $name, $spec := .Values.traefikMiddlewares }}
     {{- $middleware := printf "%s-%s@kubernetescrd" $namespace $name }}
     {{- $middlewares = append $middlewares $middleware }}
   {{- end }}
   {{- $additionalAnnotations = dict "traefik.ingress.kubernetes.io/router.middlewares" (join "," $middlewares) }}
 {{- end }}
-{{- $mergedAnnotations := merge .Values.ingressExternal.annotations $additionalAnnotations }}
+{{- $mergedAnnotations := merge $additionalAnnotations .Values.ingressExternal.annotations }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
