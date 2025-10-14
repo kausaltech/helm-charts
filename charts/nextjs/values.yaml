@@ -46,6 +46,8 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
+revisionHistoryLimit: 2
+
 service:
   type: ClusterIP
   port: 3000
