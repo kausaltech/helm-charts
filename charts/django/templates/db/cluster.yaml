@@ -26,9 +26,20 @@ spec:
       database: {{ .Values.db.database }}
       owner: {{ .Values.db.user }}
       dataChecksums: {{ $pgcluster.dataChecksums }}
-      {{- if .Values.db.postgis }}
+      {{- if or .Values.db.postgis $pgcluster.postInitTemplateSQL }}
       postInitTemplateSQL:
+        {{- if .Values.db.postgis }}
         - CREATE EXTENSION postgis;
+        {{- end }}
+        {{- range $sql := $pgcluster.postInitTemplateSQL }}
+        - {{ $sql | quote }}
+        {{- end }}
+      {{- end }}
+      {{- if or $pgcluster.postInitApplicationSQL }}
+      postInitApplicationSQL:
+        {{- range $sql := $pgcluster.postInitApplicationSQL }}
+        - {{ $sql | quote }}
+        {{- end }}
       {{- end }}
   # Example of rolling update strategy:
   # - unsupervised: automated update of the primary once all
@@ -44,7 +55,9 @@ spec:
 
   postgresql:
     parameters:
-      {{- toYaml $pgcluster.parameters | nindent 6 }}
+      {{- range $key, $value := $pgcluster.parameters }}
+      {{ $key }}: {{ $value | quote }}
+      {{- end }}
   {{- end }}
   storage:
     size: {{ $pgcluster.size }}

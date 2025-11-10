@@ -275,7 +275,7 @@ db:
     create: true
     affinity: {}
     dataChecksums: true
-    version: '16'
+    version: '18'
     instances: 3
     # stopDelay: 1800  # Time in seconds allowed for PostgreSQL instance to gracefully shutdown (default: 1800)
     # smartShutdownTimeout: 180  # Time in seconds reserved for smart shutdown to complete. Ensure enough time for fast shutdown (stopDelay - smartShutdownTimeout)
@@ -284,6 +284,9 @@ db:
     enablePodMonitor: true
     parameters: {}  # key-value pairs to be placed in the postgres config file
     name: "" # if empty, will be generated using fullname template
+    postInitTemplateSQL: []
+    postInitApplicationSQL: []
+    # - SET idle_in_transaction_session_timeout = '60min';
     backup:
       enabled: false
       target: prefer-standby
