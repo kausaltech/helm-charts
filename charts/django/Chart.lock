@@ -1,9 +1,9 @@
 dependencies:
-- name: redis
-  repository: https://charts.bitnami.com/bitnami
-  version: 19.6.2
+- name: valkey
+  repository: https://valkey.io/valkey-helm
+  version: 0.9.3
 - name: elasticsearch
   repository: https://charts.bitnami.com/bitnami
   version: 21.3.2
-digest: sha256:cbf83046c0b46e24850af0e04d9aee47d9e3b2daf0ecb33f7b88c9d3e05f481e
-generated: "2024-07-22T14:09:49.191732738+03:00"
+digest: sha256:3fd0572aa4d9f0288262c7836a5db0e2a5de57b82c34ed3c59f7b477ee22de7e
+generated: "2026-02-26T11:40:31.477479744+02:00"

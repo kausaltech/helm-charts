@@ -136,41 +136,19 @@ celery:
       tls: []
 
 # Disable subchart by setting enabled value to false
-redis:
+valkey:
   enabled: true
   auth:
     enabled: true
-    password: redis
-  master:
-    podSecurityContext:
-      enabled: true
-      fsGroup: 1001
-
-    containerSecurityContext:
-      enabled: true
-      runAsUser: 1001
-
-    disableCommands: []  # by default the Bitnami chart disables FLUSHDB and FLUSHALL, but Django needs those
-
+    aclUsers:
+      default:
+        password: valkey
+        permissions: "~* &* +@all"
   replica:
-    podSecurityContext:
-      enabled: true
-      fsGroup: 1001
-
-    containerSecurityContext:
-      enabled: true
-      runAsUser: 1001
-
-  volumePermissions:
-    enabled: true
-    runAsUser: 1001
-
-  networkPolicy:
-    enabled: true
-    allowExternal: false
-    allowExternalEgress: false
-    ingressNSPodMatchLabels:
-      redis-client: true
+    enabled: false
+  dataStorage:
+    enabled: false
+  networkPolicy: {}
 
 elasticsearch:
   enabled: false

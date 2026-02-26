@@ -48,7 +48,7 @@ Common labels
 app.kubernetes.io/version: {{ (default .Chart.AppVersion .Values.appVersion ) | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{ template "common.names.fullname" .Subcharts.redis }}-client: "true"
+{{ template "valkey.fullname" .Subcharts.valkey }}-client: "true"
 {{- end }}
 
 {{/*
@@ -105,9 +105,9 @@ env:
   - name: ELASTICSEARCH_URL
     value: http://{{ template "elasticsearch.service.name" .Subcharts.elasticsearch }}:9200
   {{- end }}
-  {{- if .Values.redis.enabled }}
+  {{- if .Values.valkey.enabled }}
   - name: REDIS_URL
-    value: redis://{{ if .Values.redis.auth.enabled }}:{{ .Values.redis.auth.password }}@{{ end }}{{ template "common.names.fullname" .Subcharts.redis }}-master
+    value: redis://{{ if .Values.valkey.auth.enabled }}:{{ .Values.valkey.auth.aclUsers.default.password }}@{{ end }}{{ template "valkey.fullname" .Subcharts.valkey }}
   {{- end }}
   - name: NODE_NAME
     valueFrom:
