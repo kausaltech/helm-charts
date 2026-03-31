@@ -6,8 +6,13 @@ metadata:
   labels:
     {{- include "django.labels" . | nindent 4 }}
   annotations:
+    {{- if .Values.useArgocdAnnotations }}
+    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/hook: PreSync
+    {{- else }}
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    {{- end }}
     {{- if .Values.dbMigrations.annotations }}
     {{- toYaml .Values.dbMigrations.annotations | nindent 4 }}
     {{- end }}

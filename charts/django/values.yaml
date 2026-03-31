@@ -105,6 +105,9 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
+# Whether to use Argo CD sync annotations instead of helm hooks
+useArgocdAnnotations: false
+
 celery:
 # Celery Beat Values
   beat:
