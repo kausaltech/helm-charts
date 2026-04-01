@@ -69,6 +69,8 @@ metrics:
   serviceMonitor:
     enabled: false
     interval: 30s
+  djangoMetrics:
+    enabled: false
 
 # Caddy Settings (static + media files serving)
 proxy:

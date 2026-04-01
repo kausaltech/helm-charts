@@ -13,4 +13,9 @@ spec:
     - port: metrics
       path: /metrics
       interval: {{ .Values.metrics.serviceMonitor.interval | default "30s" }}
+    {{- if .Values.metrics.djangoMetrics.enabled }}
+    - port: django
+      path: /metrics
+      interval: {{ .Values.metrics.serviceMonitor.interval | default "30s" }}
+    {{- end }}
 {{- end }}
