@@ -62,15 +62,12 @@ service:
   type: ClusterIP
   port: 8000
 
-# Prometheus metrics (e.g. gunicorn-prometheus-exporter)
+# Prometheus metrics (django-prometheus)
 metrics:
   enabled: false
-  port: 9091
   serviceMonitor:
     enabled: false
     interval: 30s
-  djangoMetrics:
-    enabled: false
 
 # Caddy Settings (static + media files serving)
 proxy:

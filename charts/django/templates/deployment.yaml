@@ -78,11 +78,6 @@ spec:
             - name: django
               containerPort: {{ .Values.image.containerPort }}
               protocol: TCP
-            {{- if .Values.metrics.enabled }}
-            - name: metrics
-              containerPort: {{ .Values.metrics.port | default 9091 }}
-              protocol: TCP
-            {{- end }}
           {{- with .Values.probes }}
           {{- if .liveness.enabled }}
           livenessProbe:
