@@ -64,9 +64,11 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             {{- include "django.secretVolumeMounts" . | nindent 12 }}
+            {{- include "django.metricsMultiprocVolumeMount" . | nindent 12 }}
 
       volumes:
         {{- include "django.secretVolumes" . | nindent 8 }}
+        {{- include "django.metricsMultiprocVolume" . | nindent 8 }}
 
       {{- with .Values.nodeSelector }}
       nodeSelector:

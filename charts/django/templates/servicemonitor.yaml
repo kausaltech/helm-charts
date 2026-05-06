@@ -10,7 +10,7 @@ spec:
     matchLabels:
       {{- include "django.selectorLabels" . | nindent 6 }}
   endpoints:
-    - port: django
+    - port: metrics
       path: /metrics
       interval: {{ .Values.metrics.serviceMonitor.interval | default "30s" }}
 {{- end }}

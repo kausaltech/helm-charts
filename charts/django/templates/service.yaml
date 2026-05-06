@@ -17,6 +17,12 @@ spec:
       protocol: TCP
       name: caddy
     {{- end }}
+    {{- if .Values.metrics.enabled }}
+    - port: {{ .Values.metrics.port }}
+      targetPort: metrics
+      protocol: TCP
+      name: metrics
+    {{- end }}
   selector:
     {{- include "django.labels" . | nindent 4 }}
     app.kubernetes.io/component: {{ include "django.fullname" . }}

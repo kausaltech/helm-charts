@@ -46,6 +46,7 @@ spec:
       {{- end }}
       volumes:
         {{- include "django.secretVolumes" . | nindent 8 }}
+        {{- include "django.metricsMultiprocVolume" . | nindent 8 }}
       containers:
         - name: {{ .Values.dbMigrations.name | default "db-migrations" | quote}}
           securityContext:
@@ -55,6 +56,7 @@ spec:
             {{- toYaml .Values.dbMigrations.resources | nindent 12 }}
           volumeMounts:
             {{- include "django.secretVolumeMounts" . | nindent 12 }}
+            {{- include "django.metricsMultiprocVolumeMount" . | nindent 12 }}
           command: ["/bin/sh"]
           args:
               - -c

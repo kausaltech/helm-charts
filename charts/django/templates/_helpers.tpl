@@ -121,6 +121,10 @@ env:
     valueFrom:
       fieldRef:
         fieldPath: metadata.namespace
+  {{- if .Values.metrics.enabled }}
+  - name: PROMETHEUS_MULTIPROC_DIR
+    value: {{ .Values.metrics.multiprocDir | quote }}
+  {{- end }}
   {{- if .Values.additionalEnv }}
   {{- toYaml .Values.additionalEnv | nindent 2 }}
   {{- end }}
@@ -156,6 +160,28 @@ envFrom:
 - name: db-credentials
   secret:
     secretName: {{ include "django.dbClusterName" . }}-app
+{{- end }}
+{{- end }}
+
+{{/*
+Volume entry for the django-prometheus multiprocess directory. Per-pod emptyDir
+(medium: Memory) so writes from django-prometheus don't fail when
+PROMETHEUS_MULTIPROC_DIR is set on every pod that uses django.envVariables.
+Only the web pod's volume is actually scraped — non-web pods get their own
+unread emptyDir.
+*/}}
+{{- define "django.metricsMultiprocVolume" -}}
+{{- if .Values.metrics.enabled }}
+- name: prometheus-multiproc
+  emptyDir:
+    medium: Memory
+{{- end }}
+{{- end }}
+
+{{- define "django.metricsMultiprocVolumeMount" -}}
+{{- if .Values.metrics.enabled }}
+- name: prometheus-multiproc
+  mountPath: {{ .Values.metrics.multiprocDir }}
 {{- end }}
 {{- end }}
 

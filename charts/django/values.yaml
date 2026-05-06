@@ -65,9 +65,23 @@ service:
 # Prometheus metrics (django-prometheus)
 metrics:
   enabled: false
+  # Dedicated port served by a sidecar that aggregates django-prometheus
+  # multiprocess metrics, so scrapes don't go through Django middleware
+  # (which would reject them via ALLOWED_HOSTS).
+  # Breaking change in chart 0.8.4: ServiceMonitor now scrapes this dedicated
+  # `metrics` port instead of the main `django` port.
+  port: 9091
+  # Pod startup cleanup is handled by an init container so stale per-PID files
+  # from crashed containers do not survive inside the shared emptyDir.
+  multiprocDir: /tmp/django_prometheus_multiproc
   serviceMonitor:
     enabled: false
     interval: 30s
+  exporter:
+    # Image for the metrics sidecar. If empty, the main app image is reused
+    # (it already has prometheus_client as a transitive dep of django-prometheus).
+    image: ""
+    resources: {}
 
 # Caddy Settings (static + media files serving)
 proxy:
