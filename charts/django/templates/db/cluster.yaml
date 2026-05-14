@@ -47,6 +47,9 @@ spec:
   # - supervised: requires manual supervision to perform
   #               the switchover of the primary
   primaryUpdateStrategy: unsupervised
+  {{- if $pgcluster.primaryUpdateMethod }}
+  primaryUpdateMethod: {{ $pgcluster.primaryUpdateMethod }}
+  {{- end }}
   {{- if $pgcluster.enablePodMonitor }}
   monitoring:
     enablePodMonitor: true
@@ -108,5 +111,8 @@ spec:
             key: AWS_SECRET_ACCESS_KEY
       wal:
         maxParallel: 8
+  {{- end }}
+  {{- if $pgcluster.customSpec }}
+  {{- toYaml $pgcluster.customSpec | nindent 2 }}
   {{- end }}
 {{- end -}}

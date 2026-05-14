@@ -288,6 +288,8 @@ db:
     name: "" # if empty, will be generated using fullname template
     postInitTemplateSQL: []
     postInitApplicationSQL: []
+    customSpec: {}  # if set, will be added to the cluster spec
+    primaryUpdateMethod:  # 'switchover' or 'restart'
     # - SET idle_in_transaction_session_timeout = '60min';
     backup:
       enabled: false
