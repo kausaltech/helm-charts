@@ -34,6 +34,8 @@ dbMigrations:
   # - "OnFailure": Restart the pod if it fails
   # - "Never": Don't restart on failure, keep failed pods for debugging
   restartPolicy: Never
+  alerting:
+    enabled: false
 
 # Django Static files and Media data folders
 # Set to path from working directory

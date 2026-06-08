@@ -1,0 +1,20 @@
+{{- if and .Values.dbMigrations.enabled .Values.dbMigrations.alerting.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "django.fullname" . }}-migrations
+  labels:
+    {{- include "django.labels" . | nindent 4 }}
+spec:
+  groups:
+    - name: django-migrations
+      rules:
+        - alert: DeploymentCheckOrMigrationJobFailed
+          expr: |
+            kube_job_status_failed{job_name=~".*-db-migrations.*", namespace="{{ .Release.Namespace }}"} > 0
+          labels:
+            severity: critical
+          annotations:
+            summary: "Migration job failed in {{ .Release.Namespace }}"
+            description: "The db-migrations job failed. Check logs in Loki: {namespace=\"{{ .Release.Namespace }}\", pod=~\".*-db-migrations.*\"}"
+{{- end }}
