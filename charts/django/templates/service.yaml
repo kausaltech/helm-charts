@@ -24,5 +24,5 @@ spec:
       name: metrics
     {{- end }}
   selector:
-    {{- include "django.labels" . | nindent 4 }}
+    {{- include "django.stableSelectorLabels" . | nindent 4 }}
     app.kubernetes.io/component: {{ include "django.fullname" . }}

@@ -56,14 +56,6 @@ spec:
           {{- include "django.envVariables" . | nindent 10 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- if .Values.metrics.enabled }}
-          volumeMounts:
-            {{- include "django.metricsMultiprocVolumeMount" . | nindent 12 }}
-          {{- end }}
-      {{- if .Values.metrics.enabled }}
-      volumes:
-        {{- include "django.metricsMultiprocVolume" . | nindent 8 }}
-      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

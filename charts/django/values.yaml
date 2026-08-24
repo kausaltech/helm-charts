@@ -47,11 +47,19 @@ probes:
     path: /healthy
     # Use explicit HTTP Host header
     host: ""
+    # Defaults if unset: initialDelaySeconds 30, periodSeconds 10, failureThreshold 30
+    # initialDelaySeconds:
+    # periodSeconds:
+    # failureThreshold:
   readiness:
     enabled: true
     path: /ready
     # Use explicit HTTP Host header
     host: ""
+    # Defaults if unset: initialDelaySeconds 5, periodSeconds 10, failureThreshold 30
+    # initialDelaySeconds:
+    # periodSeconds:
+    # failureThreshold:
 
 imagePullSecrets: []
 nameOverride: ""
@@ -73,15 +81,52 @@ metrics:
   port: 9091
   # Pod startup cleanup is handled by an init container so stale per-PID files
   # from crashed containers do not survive inside the shared emptyDir.
+  # NOTE: only pods running the exporter sidecar get this directory and the matching
+  # env var -- see the django.metricsMultiproc* helpers. Celery, cronjobs and the
+  # migrations job get neither; they never construct django-prometheus metrics.
   multiprocDir: /tmp/django_prometheus_multiproc
+  # The directory is a tmpfs, so its contents count against the pod's memory limit.
+  # prometheus_client never reclaims counter_/histogram_ files for dead worker PIDs,
+  # so this bounds unbounded growth. Keep generous headroom: a full volume surfaces as
+  # ENOSPC inside the request path. Alert on django_prometheus_multiproc_dir_files
+  # (exposed by the sidecar) long before this is reached.
+  multiprocSizeLimit: 512Mi
   serviceMonitor:
     enabled: false
     interval: 30s
+  prometheusRule:
+    enabled: false
+    # The `job` label these alerts match on. Defaults to django.fullname, which is
+    # what the Prometheus Operator assigns when the ServiceMonitor sets no jobLabel
+    # (it uses the Service name). Override if your cluster relabels scrape targets --
+    # a wrong value here renders valid rules that never fire. Check the live value:
+    #   scrape_duration_seconds{namespace="<ns>", container="metrics-exporter"}
+    jobName: ""
+    # Labels the Prometheus CR's ruleSelector requires; a rule with the wrong labels
+    # renders correctly and is then silently ignored. Check the live selector with:
+    #   kubectl get prometheus -A -o jsonpath='{.items[*].spec.ruleSelector}'
+    additionalLabels: {}
+    # Alert when a scrape takes longer than this. The sidecar aggregates every .db
+    # file in multiprocDir on each scrape, so this is the leading indicator that
+    # worker churn is outgrowing the endpoint.
+    slowScrapeSeconds: 5
+    # Alert when the directory holds more than this many .db files (2 per worker PID).
+    maxFiles: 1000
   exporter:
     # Image for the metrics sidecar. If empty, the main app image is reused
     # (it already has prometheus_client as a transitive dep of django-prometheus).
     image: ""
     resources: {}
+    # Disabled by default, and think twice before enabling it. The only endpoint this
+    # container serves is /metrics, and scraping it is expensive: kubelet's 1s default
+    # timeoutSeconds is exceeded once enough dead-PID files accumulate, at which point
+    # the sidecar is killed every few minutes. Prometheus already scrapes this endpoint
+    # every serviceMonitor.interval -- alert on `up == 0` instead of probing it.
+    livenessProbe:
+      enabled: false
+      periodSeconds: 30
+      timeoutSeconds: 5
+      failureThreshold: 3
 
 # Caddy Settings (static + media files serving)
 proxy:

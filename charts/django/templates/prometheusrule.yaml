@@ -1,0 +1,62 @@
+{{- if and .Values.metrics.enabled .Values.metrics.prometheusRule.enabled }}
+{{- /*
+  The `job` label the Prometheus Operator attaches to these targets. With no
+  jobLabel on the ServiceMonitor the operator defaults it to the Service name,
+  which is django.fullname -- but a cluster with its own relabeling can differ,
+  and a rule with the wrong job matcher renders fine and then never fires.
+  Verify with: scrape_duration_seconds{namespace="<ns>", container="metrics-exporter"}
+*/}}
+{{- $job := .Values.metrics.prometheusRule.jobName | default (include "django.fullname" .) }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "django.fullname" . }}
+  labels:
+    {{- include "django.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ include "django.fullname" . }}
+    {{- with .Values.metrics.prometheusRule.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  groups:
+    - name: {{ include "django.fullname" . }}.metrics-exporter
+      rules:
+        # The metrics sidecar has no liveness probe by design, so `up` is the only
+        # thing that notices when it stops serving. Scoped to this release: the
+        # `container` label alone would match every other django release's sidecar.
+        - alert: DjangoMetricsExporterDown
+          expr: 'up{namespace="{{ .Release.Namespace }}", job="{{ $job }}", container="metrics-exporter"} == 0'
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'Metrics exporter for {{ include "django.fullname" . }} is not being scraped'
+            description: 'The django-prometheus aggregating sidecar has not answered a scrape for 15m, so application metrics for this release are missing.'
+
+        - alert: DjangoMetricsCollectionSlow
+          expr: 'scrape_duration_seconds{namespace="{{ .Release.Namespace }}", job="{{ $job }}", container="metrics-exporter"} > {{ .Values.metrics.prometheusRule.slowScrapeSeconds }}'
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'Metrics collection for {{ include "django.fullname" . }} is slow'
+            description: 'Aggregating PROMETHEUS_MULTIPROC_DIR takes over {{ .Values.metrics.prometheusRule.slowScrapeSeconds }}s. Collection cost scales with accumulated dead worker PIDs; check django_prometheus_multiproc_dir_files and the gunicorn max_requests setting.'
+
+        - alert: DjangoMultiprocDirGrowing
+          expr: 'django_prometheus_multiproc_dir_files{namespace="{{ .Release.Namespace }}", job="{{ $job }}"} > {{ .Values.metrics.prometheusRule.maxFiles }}'
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: 'Multiprocess metrics directory for {{ include "django.fullname" . }} is growing'
+            description: 'More than {{ .Values.metrics.prometheusRule.maxFiles }} .db files (2 per worker PID) have accumulated. Every scrape re-reads all of them, and the tmpfs counts against the pod memory limit. Raise gunicorn max_requests or recycle the pods.'
+
+        - alert: DjangoMetricsExporterRestarting
+          expr: 'increase(kube_pod_container_status_restarts_total{namespace="{{ .Release.Namespace }}", container="metrics-exporter", pod=~"{{ include "django.fullname" . }}-.*"}[1h]) > 0'
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'Metrics exporter for {{ include "django.fullname" . }} is restarting'
+            description: 'The exporter sidecar restarted in the last hour. If a liveness probe is enabled on it, slow multiprocess collection is the likely cause.'
+{{- end }}

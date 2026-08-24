@@ -12,7 +12,7 @@ spec:
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   selector:
     matchLabels:
-      {{- include "django.labels" . | nindent 6 }}
+      {{- include "django.stableSelectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: {{ include "django.fullname" . }}
   template:
     metadata:
@@ -90,6 +90,7 @@ spec:
                   {{ . }}
           {{- end }}
           {{- include "django.envVariables" . | nindent 10 }}
+          {{- include "django.metricsMultiprocEnv" . | nindent 12 }}
           ports:
             - name: django
               containerPort: {{ .Values.image.containerPort }}
@@ -106,7 +107,7 @@ spec:
                   value: {{ .liveness.host }}
               {{- end }}
             initialDelaySeconds: {{ .liveness.initialDelaySeconds | default 30 }}
-            periodSeconds: {{ .liveness.initialDelaySeconds | default 10 }}
+            periodSeconds: {{ .liveness.periodSeconds | default 10 }}
             failureThreshold: {{ .liveness.failureThreshold | default 30 }}
           {{- end }}
           {{- if .readiness.enabled }}
@@ -120,7 +121,7 @@ spec:
                   value: {{ .readiness.host }}
               {{- end }}
             initialDelaySeconds: {{ .readiness.initialDelaySeconds | default 5 }}
-            periodSeconds: {{ .readiness.initialDelaySeconds | default 10 }}
+            periodSeconds: {{ .readiness.periodSeconds | default 10 }}
             failureThreshold: {{ .readiness.failureThreshold | default 30 }}
           {{- end }}
           {{- end }}
@@ -167,21 +168,61 @@ spec:
           command: ["python", "-c"]
           args:
             - |
+              import os
               import threading
               from prometheus_client import CollectorRegistry, multiprocess, start_http_server
+              from prometheus_client.core import GaugeMetricFamily
+
+              class MultiprocDirCollector:
+                  # Report the size of the multiprocess directory itself. MultiProcessCollector
+                  # re-reads every .db file on each scrape, so these two gauges track how
+                  # expensive collection is becoming as dead worker PIDs accumulate.
+                  #
+                  # This must yield metric families rather than use Gauge(): the sidecar has
+                  # PROMETHEUS_MULTIPROC_DIR set as well, so a Gauge would route through
+                  # MultiProcessValue and try to create a .db file in a read-only mount.
+                  def __init__(self, path):
+                      self.path = path
+
+                  def collect(self):
+                      try:
+                          names = [n for n in os.listdir(self.path) if n.endswith('.db')]
+                          total = sum(os.path.getsize(os.path.join(self.path, n)) for n in names)
+                      except OSError:
+                          return
+                      files = GaugeMetricFamily(
+                          'django_prometheus_multiproc_dir_files',
+                          'Number of .db files in PROMETHEUS_MULTIPROC_DIR',
+                      )
+                      files.add_metric([], len(names))
+                      yield files
+                      size = GaugeMetricFamily(
+                          'django_prometheus_multiproc_dir_bytes',
+                          'Total size of .db files in PROMETHEUS_MULTIPROC_DIR',
+                      )
+                      size.add_metric([], total)
+                      yield size
+
               registry = CollectorRegistry()
               multiprocess.MultiProcessCollector(registry)
+              registry.register(MultiprocDirCollector(os.environ['PROMETHEUS_MULTIPROC_DIR']))
               start_http_server({{ .Values.metrics.port }}, registry=registry)
               threading.Event().wait()
           ports:
             - name: metrics
               containerPort: {{ .Values.metrics.port }}
               protocol: TCP
+          {{- with .Values.metrics.exporter.livenessProbe }}
+          {{- if .enabled }}
           livenessProbe:
             httpGet:
               path: /metrics
               port: metrics
-            periodSeconds: 30
+            periodSeconds: {{ .periodSeconds | default 30 }}
+            timeoutSeconds: {{ .timeoutSeconds | default 5 }}
+            failureThreshold: {{ .failureThreshold | default 3 }}
+          {{- end }}
+          {{- end }}
           resources:
             {{- toYaml .Values.metrics.exporter.resources | nindent 12 }}
           volumeMounts:
