@@ -148,7 +148,18 @@ env:
   {{- toYaml .Values.additionalEnv | nindent 2 }}
   {{- end }}
 
-  {{- if or .Values.envSecrets .Values.envConfigs }}
+{{- end }}
+
+{{/*
+envFrom entries. Kept separate from django.envVariables so that callers can
+append extra `env:` list items between the two -- appending after a helper that
+emitted `envFrom:` last would silently add the item to the WRONG list, which
+renders an EnvFromSource with a bare `name` field and makes the Deployment fail
+schema validation. Every template that includes django.envVariables must also
+include this, immediately after (and after any extra env items).
+*/}}
+{{- define "django.envFrom" -}}
+{{- if or .Values.envSecrets .Values.envConfigs }}
 envFrom:
   {{- if .Values.envSecrets }}
   - secretRef:
@@ -163,8 +174,7 @@ envFrom:
   {{- if .Values.additionalEnvFrom }}
     {{- toYaml .Values.additionalEnvFrom | nindent 2 }}
   {{- end }}
-  {{- end }}
-
+{{- end }}
 {{- end }}
 
 {{- define "django.secretVolumes" -}}

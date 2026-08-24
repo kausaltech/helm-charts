@@ -54,6 +54,7 @@ spec:
               protocol: TCP
           {{- end }}
           {{- include "django.envVariables" . | nindent 10 }}
+          {{- include "django.envFrom" . | nindent 10 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

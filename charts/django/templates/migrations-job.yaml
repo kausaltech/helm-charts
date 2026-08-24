@@ -61,4 +61,5 @@ spec:
               - >-
                   {{ .Values.dbMigrations.command }}
           {{- include "django.envVariables" . | nindent 10 }}
+          {{- include "django.envFrom" . | nindent 10 }}
 {{- end }}

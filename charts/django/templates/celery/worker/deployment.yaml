@@ -60,6 +60,7 @@ spec:
           {{- end }}
           # TODO: Add liveness and readiness probes, e.g. https://github.com/celery/celery/issues/4079
           {{- include "django.envVariables" . | nindent 10 }}
+          {{- include "django.envFrom" . | nindent 10 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:

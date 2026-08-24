@@ -91,6 +91,7 @@ spec:
           {{- end }}
           {{- include "django.envVariables" . | nindent 10 }}
           {{- include "django.metricsMultiprocEnv" . | nindent 12 }}
+          {{- include "django.envFrom" . | nindent 10 }}
           ports:
             - name: django
               containerPort: {{ .Values.image.containerPort }}
