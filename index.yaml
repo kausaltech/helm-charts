@@ -2,6 +2,24 @@ apiVersion: v1
 entries:
   django:
   - apiVersion: v2
+    created: "2026-09-01T19:30:14.605922826Z"
+    dependencies:
+    - condition: valkey.enabled
+      name: valkey
+      repository: https://valkey.io/valkey-helm
+      version: ^0.11.0
+    - condition: elasticsearch.enabled
+      name: elasticsearch
+      repository: https://charts.bitnami.com/bitnami
+      version: 21.3.2
+    description: Deploy Django in Kubernetes
+    digest: be4c96e716a12ac7309b915c45dcf7d726fe1232c3f60258579ce134d4b9ac44
+    name: django
+    type: application
+    urls:
+    - https://github.com/kausaltech/helm-charts/releases/download/django-0.8.8/django-0.8.8.tgz
+    version: 0.8.8
+  - apiVersion: v2
     created: "2026-08-24T21:13:10.291693655Z"
     dependencies:
     - condition: valkey.enabled
@@ -966,4 +984,4 @@ entries:
     urls:
     - https://github.com/kausaldev/helm-charts/releases/download/nextjs-0.2.1/nextjs-0.2.1.tgz
     version: 0.2.1
-generated: "2026-08-24T21:13:10.291977433Z"
+generated: "2026-09-01T19:30:14.606272353Z"
