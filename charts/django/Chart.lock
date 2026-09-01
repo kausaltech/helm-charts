@@ -1,9 +1,9 @@
 dependencies:
 - name: valkey
   repository: https://valkey.io/valkey-helm
-  version: 0.9.3
+  version: 0.11.0
 - name: elasticsearch
   repository: https://charts.bitnami.com/bitnami
   version: 21.3.2
-digest: sha256:3fd0572aa4d9f0288262c7836a5db0e2a5de57b82c34ed3c59f7b477ee22de7e
-generated: "2026-02-26T11:40:31.477479744+02:00"
+digest: sha256:87595d488a7be7c1490c1c5a0c3cb2cfcd744ae5dada245213da9ae939c25e6a
+generated: "2026-09-01T22:27:54.830301728+03:00"
