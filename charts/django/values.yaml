@@ -163,7 +163,10 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-# Whether to use Argo CD sync annotations instead of helm hooks
+# Whether to use Argo CD sync annotations instead of helm hooks.
+# Sync ordering: configuration/RBAC in negative waves, backing services in wave 0,
+# migrations in wave 1, and application workloads in wave 2. Failed migrations
+# block workload updates. The completed migration Job remains until the next sync.
 useArgocdAnnotations: false
 
 celery:

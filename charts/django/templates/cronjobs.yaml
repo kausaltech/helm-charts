@@ -4,6 +4,10 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: {{ .name }}
+  {{- if $.Values.useArgocdAnnotations }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  {{- end }}
 spec:
   schedule: {{ .schedule }}
   successfulJobsHistoryLimit: 1

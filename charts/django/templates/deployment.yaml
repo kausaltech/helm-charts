@@ -5,6 +5,10 @@ metadata:
   labels:
     {{- include "django.labels" . | nindent 4 }}
     app.kubernetes.io/component: {{ include "django.fullname" . }}
+  {{- if .Values.useArgocdAnnotations }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  {{- end }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}

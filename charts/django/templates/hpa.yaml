@@ -5,6 +5,10 @@ metadata:
   name: {{ include "django.fullname" . }}
   labels:
     {{- include "django.labels" . | nindent 4 }}
+  {{- if .Values.useArgocdAnnotations }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  {{- end }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
