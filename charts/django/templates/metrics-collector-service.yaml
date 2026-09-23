@@ -1,0 +1,22 @@
+{{- if .Values.metrics.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "django.fullname" . }}-metrics-collector
+  labels:
+    {{- include "django.labels" . | nindent 4 }}
+    app.kubernetes.io/component: metrics-collector
+spec:
+  ports:
+    - name: otlp-http
+      port: 4318
+      targetPort: otlp-http
+      protocol: TCP
+    - name: metrics
+      port: {{ .Values.metrics.port }}
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    {{- include "django.stableSelectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: metrics-collector
+{{- end }}

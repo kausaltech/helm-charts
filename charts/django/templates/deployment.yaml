@@ -41,22 +41,6 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
-        {{- if .Values.metrics.enabled }}
-        - name: prepare-prometheus-multiproc
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: {{ default (include "django.appImage" .) .Values.metrics.exporter.image }}
-          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
-          env:
-            - name: PROMETHEUS_MULTIPROC_DIR
-              value: {{ .Values.metrics.multiprocDir | quote }}
-          command: ["/bin/sh", "-c"]
-          args:
-            - rm -rf "${PROMETHEUS_MULTIPROC_DIR:?}/"*
-          volumeMounts:
-            - name: prometheus-multiproc
-              mountPath: {{ .Values.metrics.multiprocDir }}
-        {{- end }}
         {{- if .Values.db.cluster.create }}
         - name: wait-for-db
           image: bitnami/kubectl
@@ -94,7 +78,12 @@ spec:
                   {{ . }}
           {{- end }}
           {{- include "django.envVariables" . | nindent 10 }}
-          {{- include "django.metricsMultiprocEnv" . | nindent 12 }}
+          {{- if .Values.metrics.enabled }}
+            - name: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
+              value: http://{{ include "django.fullname" . }}-metrics-collector:4318/v1/metrics
+            - name: OTEL_SEMCONV_STABILITY_OPT_IN
+              value: http
+          {{- end }}
           {{- include "django.envFrom" . | nindent 10 }}
           ports:
             - name: django
@@ -134,7 +123,6 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             {{- include "django.secretVolumeMounts" . | nindent 12 }}
-            {{- include "django.metricsMultiprocVolumeMount" . | nindent 12 }}
 
         {{- if .Values.proxy.enabled }}
         - name: {{ printf "%s-%s" .Chart.Name "caddy" }}
@@ -160,81 +148,6 @@ spec:
               mountPath: /srv/{{ .Values.data.mediaFiles }}
           {{- end }}
         {{- end }}
-
-        {{- if .Values.metrics.enabled }}
-        - name: metrics-exporter
-          securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-          image: {{ default (include "django.appImage" .) .Values.metrics.exporter.image }}
-          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
-          env:
-            - name: PROMETHEUS_MULTIPROC_DIR
-              value: {{ .Values.metrics.multiprocDir | quote }}
-          command: ["python", "-c"]
-          args:
-            - |
-              import os
-              import threading
-              from prometheus_client import CollectorRegistry, multiprocess, start_http_server
-              from prometheus_client.core import GaugeMetricFamily
-
-              class MultiprocDirCollector:
-                  # Report the size of the multiprocess directory itself. MultiProcessCollector
-                  # re-reads every .db file on each scrape, so these two gauges track how
-                  # expensive collection is becoming as dead worker PIDs accumulate.
-                  #
-                  # This must yield metric families rather than use Gauge(): the sidecar has
-                  # PROMETHEUS_MULTIPROC_DIR set as well, so a Gauge would route through
-                  # MultiProcessValue and try to create a .db file in a read-only mount.
-                  def __init__(self, path):
-                      self.path = path
-
-                  def collect(self):
-                      try:
-                          names = [n for n in os.listdir(self.path) if n.endswith('.db')]
-                          total = sum(os.path.getsize(os.path.join(self.path, n)) for n in names)
-                      except OSError:
-                          return
-                      files = GaugeMetricFamily(
-                          'django_prometheus_multiproc_dir_files',
-                          'Number of .db files in PROMETHEUS_MULTIPROC_DIR',
-                      )
-                      files.add_metric([], len(names))
-                      yield files
-                      size = GaugeMetricFamily(
-                          'django_prometheus_multiproc_dir_bytes',
-                          'Total size of .db files in PROMETHEUS_MULTIPROC_DIR',
-                      )
-                      size.add_metric([], total)
-                      yield size
-
-              registry = CollectorRegistry()
-              multiprocess.MultiProcessCollector(registry)
-              registry.register(MultiprocDirCollector(os.environ['PROMETHEUS_MULTIPROC_DIR']))
-              start_http_server({{ .Values.metrics.port }}, registry=registry)
-              threading.Event().wait()
-          ports:
-            - name: metrics
-              containerPort: {{ .Values.metrics.port }}
-              protocol: TCP
-          {{- with .Values.metrics.exporter.livenessProbe }}
-          {{- if .enabled }}
-          livenessProbe:
-            httpGet:
-              path: /metrics
-              port: metrics
-            periodSeconds: {{ .periodSeconds | default 30 }}
-            timeoutSeconds: {{ .timeoutSeconds | default 5 }}
-            failureThreshold: {{ .failureThreshold | default 3 }}
-          {{- end }}
-          {{- end }}
-          resources:
-            {{- toYaml .Values.metrics.exporter.resources | nindent 12 }}
-          volumeMounts:
-            - name: prometheus-multiproc
-              mountPath: {{ .Values.metrics.multiprocDir }}
-              readOnly: true
-        {{- end }}
       volumes:
         {{- if .Values.proxy.enabled }}
         {{- if .Values.proxy.generateCaddyfile }}
@@ -247,7 +160,6 @@ spec:
           emptyDir: {}
         {{- end }}
         {{- end }}
-        {{- include "django.metricsMultiprocVolume" . | nindent 8 }}
         {{- include "django.secretVolumes" . | nindent 8 }}
 
       {{- with .Values.nodeSelector }}

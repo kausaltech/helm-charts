@@ -1,0 +1,52 @@
+{{- if .Values.metrics.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "django.fullname" . }}-metrics-collector
+  labels:
+    {{- include "django.labels" . | nindent 4 }}
+    app.kubernetes.io/component: metrics-collector
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "django.stableSelectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: metrics-collector
+  template:
+    metadata:
+      labels:
+        {{- include "django.labels" . | nindent 8 }}
+        app.kubernetes.io/component: metrics-collector
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/metrics-collector-configmap.yaml") . | sha256sum }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: metrics-collector
+          image: {{ .Values.metrics.collector.image | quote }}
+          imagePullPolicy: IfNotPresent
+          args: ["--config=/etc/otelcol/config.yaml"]
+          ports:
+            - name: otlp-http
+              containerPort: 4318
+              protocol: TCP
+            - name: metrics
+              containerPort: {{ .Values.metrics.port }}
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /etc/otelcol/config.yaml
+              subPath: config.yaml
+              readOnly: true
+          resources:
+            {{- toYaml .Values.metrics.collector.resources | nindent 12 }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "django.fullname" . }}-metrics-collector
+{{- end }}

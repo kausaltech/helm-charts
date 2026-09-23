@@ -192,47 +192,6 @@ envFrom:
 {{- end }}
 {{- end }}
 
-{{/*
-django-prometheus multiprocess directory.
-
-These three helpers MUST be used together and only on pods that run the metrics
-exporter sidecar -- i.e. the web Deployment. prometheus_client selects multiprocess
-mode on the mere presence of PROMETHEUS_MULTIPROC_DIR and then opens files under it
-without creating the directory, so setting the env var without mounting the volume
-crashes the pod at the first metric construction. Setting neither is safe: the client
-falls back to single-process MutexValue.
-
-Non-web pods (celery, cronjobs, migrations) deliberately get none of this. They never
-build the Django middleware stack, so they never construct django-prometheus metrics
-and never wrote to the directory in the first place.
-
-The volume is a tmpfs, so its contents count against the pod's memory limit; sizeLimit
-bounds that. Alert on django_prometheus_multiproc_dir_files well before the limit --
-a full volume surfaces as ENOSPC inside the request path.
-*/}}
-{{- define "django.metricsMultiprocEnv" -}}
-{{- if .Values.metrics.enabled }}
-- name: PROMETHEUS_MULTIPROC_DIR
-  value: {{ .Values.metrics.multiprocDir | quote }}
-{{- end }}
-{{- end }}
-
-{{- define "django.metricsMultiprocVolume" -}}
-{{- if .Values.metrics.enabled }}
-- name: prometheus-multiproc
-  emptyDir:
-    medium: Memory
-    sizeLimit: {{ .Values.metrics.multiprocSizeLimit }}
-{{- end }}
-{{- end }}
-
-{{- define "django.metricsMultiprocVolumeMount" -}}
-{{- if .Values.metrics.enabled }}
-- name: prometheus-multiproc
-  mountPath: {{ .Values.metrics.multiprocDir }}
-{{- end }}
-{{- end }}
-
 {{- define "django.secretVolumeMounts" -}}
 {{- if and .Values.externalSecrets.enabled .Values.externalSecrets.targets }}
 {{- range .Values.externalSecrets.targets }}

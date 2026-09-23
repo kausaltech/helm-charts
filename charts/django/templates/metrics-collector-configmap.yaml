@@ -1,0 +1,26 @@
+{{- if .Values.metrics.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "django.fullname" . }}-metrics-collector
+  labels:
+    {{- include "django.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          http:
+            endpoint: 0.0.0.0:4318
+    exporters:
+      prometheus:
+        endpoint: 0.0.0.0:{{ .Values.metrics.port }}
+        metric_expiration: 5m
+        resource_constant_labels:
+          included: [k8s.pod.name, k8s.namespace.name, deployment.environment.name]
+    service:
+      pipelines:
+        metrics:
+          receivers: [otlp]
+          exporters: [prometheus]
+{{- end }}

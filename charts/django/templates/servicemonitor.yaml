@@ -9,6 +9,7 @@ spec:
   selector:
     matchLabels:
       {{- include "django.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: metrics-collector
   endpoints:
     - port: metrics
       path: /metrics
