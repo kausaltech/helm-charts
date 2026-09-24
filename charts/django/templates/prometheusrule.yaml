@@ -28,7 +28,35 @@ spec:
             severity: warning
           annotations:
             summary: 'Metrics Collector for {{ include "django.fullname" . }} is not being scraped'
-            description: 'The Collector sidecar has not answered a scrape for 15m.'
+            description: 'The namespace Collector has not answered a scrape for 15m.'
+
+        {{- if .Values.metrics.sourceHeartbeatAlerts.enabled }}
+        - alert: DjangoMetricsSourceMissing
+          expr: >-
+            kube_pod_container_status_running{namespace="{{ .Release.Namespace }}", container="{{ .Chart.Name }}", pod=~"{{ include "django.fullname" . }}-[a-z0-9]+-[a-z0-9]+"} == 1
+            unless on(namespace, pod, container)
+            max_over_time(service_heartbeat{namespace="{{ .Release.Namespace }}", container="{{ .Chart.Name }}"}[2m])
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'Metrics from Django pod {{ "{{ $labels.pod }}" }} are missing'
+            description: 'The running Django container has not delivered a heartbeat through the Collector to Prometheus.'
+
+        {{- if and .Values.celery.worker.enabled .Values.metrics.celeryWorker.enabled }}
+        - alert: CeleryMetricsSourceMissing
+          expr: >-
+            kube_pod_container_status_running{namespace="{{ .Release.Namespace }}", container="celery-worker", pod=~"{{ include "django.fullname" . }}-{{ .Values.celery.worker.componentName }}-[a-z0-9]+-[a-z0-9]+"} == 1
+            unless on(namespace, pod, container)
+            max_over_time(service_heartbeat{namespace="{{ .Release.Namespace }}", container="celery-worker"}[2m])
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: 'Metrics from Celery pod {{ "{{ $labels.pod }}" }} are missing'
+            description: 'The running Celery container has not delivered a heartbeat through the Collector to Prometheus.'
+        {{- end }}
+        {{- end }}
 
         - alert: DjangoMetricsCollectionSlow
           expr: 'scrape_duration_seconds{namespace="{{ .Release.Namespace }}", job="{{ $job }}", container="metrics-collector"} > {{ .Values.metrics.prometheusRule.slowScrapeSeconds }}'
@@ -46,5 +74,5 @@ spec:
             severity: warning
           annotations:
             summary: 'Metrics Collector for {{ include "django.fullname" . }} is restarting'
-            description: 'The Collector sidecar restarted in the last hour.'
+            description: 'The namespace Collector restarted in the last hour.'
 {{- end }}

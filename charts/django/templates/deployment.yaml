@@ -81,6 +81,8 @@ spec:
           {{- if .Values.metrics.enabled }}
             - name: OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
               value: http://{{ include "django.fullname" . }}-metrics-collector:4318/v1/metrics
+            - name: OTEL_SOURCE_CONTAINER_NAME
+              value: {{ .Chart.Name | quote }}
             - name: OTEL_SEMCONV_STABILITY_OPT_IN
               value: http
           {{- end }}

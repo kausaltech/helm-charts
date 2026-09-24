@@ -70,15 +70,19 @@ service:
   type: ClusterIP
   port: 8000
 
-# OTLP metrics from the web workers, exposed for Prometheus by one namespace Collector.
+# OTLP metrics from web and Celery worker processes, exposed by one namespace Collector.
 metrics:
   enabled: false
-  # The app's Gunicorn workers send OTLP metrics to a Collector service. Prometheus
+  # The app's web and Celery workers send OTLP metrics to a Collector service. Prometheus
   # scrapes the Collector on this port; the app never serves metrics directly.
   port: 9091
   collector:
     image: otel/opentelemetry-collector:0.161.0
     resources: {}
+  celeryWorker:
+    enabled: false
+  sourceHeartbeatAlerts:
+    enabled: false
   serviceMonitor:
     enabled: false
     interval: 30s

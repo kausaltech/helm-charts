@@ -14,4 +14,23 @@ spec:
     - port: metrics
       path: /metrics
       interval: {{ .Values.metrics.serviceMonitor.interval | default "30s" }}
+      honorLabels: true
+      metricRelabelings:
+        - sourceLabels: [service]
+          targetLabel: scrape_service
+        - sourceLabels: [container]
+          targetLabel: scrape_container
+        - sourceLabels: [pod]
+          targetLabel: scrape_pod
+        - action: labeldrop
+          regex: ^(service|container|pod)$
+        - sourceLabels: [service_name]
+          regex: (.+)
+          targetLabel: service
+        - sourceLabels: [k8s_container_name]
+          regex: (.+)
+          targetLabel: container
+        - sourceLabels: [k8s_pod_name]
+          regex: (.+)
+          targetLabel: pod
 {{- end }}
