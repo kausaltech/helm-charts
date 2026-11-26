@@ -720,6 +720,16 @@ entries:
   mixins:
   - apiVersion: v2
     appVersion: 0.1.0
+    created: "2026-11-26T16:53:37.71929474Z"
+    description: Kubernetes mixins
+    digest: 420c5e1354b03b024fe689e6b9a0bdcb002f3e6c03becd7baaf6c71485219588
+    name: mixins
+    type: application
+    urls:
+    - https://github.com/kausaltech/helm-charts/releases/download/mixins-0.3.5/mixins-0.3.5.tgz
+    version: 0.3.5
+  - apiVersion: v2
+    appVersion: 0.1.0
     created: "2026-05-04T10:30:37.097404235Z"
     description: Kubernetes mixins
     digest: ab5c267cd14bf8c421d5db7c6246ce42128eb4b4613996db1e23b4825a7f359c
@@ -1038,4 +1048,4 @@ entries:
     urls:
     - https://github.com/kausaldev/helm-charts/releases/download/nextjs-0.2.1/nextjs-0.2.1.tgz
     version: 0.2.1
-generated: "2026-09-24T08:08:07.432406733Z"
+generated: "2026-11-26T16:53:37.719487418Z"
